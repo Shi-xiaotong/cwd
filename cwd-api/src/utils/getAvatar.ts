@@ -1,7 +1,7 @@
 /**
  * 默认 gravatar.com 前缀
  */
-const DEFAULT_AVATAR_PREFIX = 'https://gravatar.com/avatar';
+const DEFAULT_AVATAR_PREFIX = 'https://cravatar.cn/avatar';
 
 /**
  * 当缺少邮箱或邮箱为空时使用的占位 hash

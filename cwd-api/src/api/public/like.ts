@@ -37,7 +37,12 @@ export const getLikeStatus = async (
 ): Promise<Response> => {
 	try {
 		const rawPostSlug = c.req.query('post_slug') || '';
-		const postSlug = decodePostSlug(rawPostSlug);
+		let postSlug = decodePostSlug(rawPostSlug);
+		// 如果是完整 URL，提取路径部分
+		try {
+			const url = new URL(postSlug);
+			postSlug = decodeURIComponent(url.pathname);
+		} catch {}
 		const siteId = c.req.query('siteId') || '';
 
 		if (!postSlug) {
@@ -48,20 +53,25 @@ export const getLikeStatus = async (
 			c.req.header('X-CWD-Like-User') ||
 			c.req.header('x-cwd-like-user') ||
 			'';
-		const userId = userIdHeader.trim();
+		let userId = userIdHeader.trim();
+		if (!userId) {
+			const ip = c.req.header('cf-connecting-ip') || '';
+			const trimmedIp = ip.trim();
+			userId = trimmedIp ? `ip:${trimmedIp}` : 'anonymous';
+		}
 
 		const totalRow = await c.env.CWD_DB.prepare(
-			'SELECT COUNT(*) AS count FROM Likes WHERE page_slug = ? AND site_id = ?'
+			'SELECT COUNT(*) AS count FROM Likes WHERE page_slug = ?'
 		)
-			.bind(postSlug, siteId)
+			.bind(postSlug)
 			.first<{ count: number }>();
 
 		let liked = false;
 		if (userId) {
 			const row = await c.env.CWD_DB.prepare(
-				'SELECT id FROM Likes WHERE page_slug = ? AND user_id = ? AND site_id = ?'
+				'SELECT id FROM Likes WHERE page_slug = ? AND user_id = ?'
 			)
-				.bind(postSlug, userId, siteId)
+				.bind(postSlug, userId)
 				.first<{ id: number }>();
 			liked = !!row;
 		}
@@ -93,12 +103,20 @@ export const likePage = async (
 
 		const rawPostSlug =
 			typeof body.postSlug === 'string' ? body.postSlug.trim() : '';
-		const postSlug = decodePostSlug(rawPostSlug);
+		let postSlug = decodePostSlug(rawPostSlug);
+		// 如果是完整 URL，提取路径部分
+		try {
+			const url = new URL(postSlug);
+			postSlug = decodeURIComponent(url.pathname);
+		} catch {}
 		const rawPostTitle =
 			typeof body.postTitle === 'string' ? body.postTitle.trim() : '';
 		const rawPostUrl =
 			typeof body.postUrl === 'string' ? body.postUrl.trim() : '';
-		const siteId = typeof body.siteId === 'string' ? body.siteId.trim() : '';
+		let siteId = typeof body.siteId === 'string' ? body.siteId.trim() : '';
+		if (!siteId) {
+			siteId = (c.req.query('siteId') || c.req.header('X-CWD-Site-Id') || '').trim();
+		}
 
 		if (!postSlug) {
 			return c.json({ message: 'postSlug is required' }, 400);
@@ -109,9 +127,9 @@ export const likePage = async (
 		const now = Date.now();
 
 		const existingLike = await c.env.CWD_DB.prepare(
-			'SELECT id FROM Likes WHERE page_slug = ? AND user_id = ? AND site_id = ?'
+			'SELECT id FROM Likes WHERE page_slug = ? AND user_id = ?'
 		)
-			.bind(postSlug, userId, siteId)
+			.bind(postSlug, userId)
 			.first<{ id: number }>();
 
 		let alreadyLiked = false;
@@ -161,9 +179,9 @@ export const likePage = async (
 		}
 
 		const totalRow = await c.env.CWD_DB.prepare(
-			'SELECT COUNT(*) AS count FROM Likes WHERE page_slug = ? AND site_id = ?'
+			'SELECT COUNT(*) AS count FROM Likes WHERE page_slug = ?'
 		)
-			.bind(postSlug, siteId)
+			.bind(postSlug)
 			.first<{ count: number }>();
 
 		const totalLikes = totalRow?.count || 0;
