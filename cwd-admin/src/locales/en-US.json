@@ -4,7 +4,8 @@
     "stats": "Dashboard",
     "analytics": "Analytics",
     "settings": "Settings",
-    "data": "Data"
+    "data": "Data",
+    "r2": "Images"
   },
   "layout": {
     "toggleMenu": "Toggle Menu",
@@ -322,5 +323,24 @@
     "saveSuccess": "Saved Successfully",
     "saveFailed": "Save Failed",
     "loading": "Loading..."
+  },
+  "r2": {
+    "title": "R2 Image Manager",
+    "bucket": "Bucket",
+    "upload": "Upload Images",
+    "uploading": "Uploading...",
+    "refresh": "Refresh",
+    "empty": "Directory is empty",
+    "copyLink": "Copy Link",
+    "delete": "Delete",
+    "confirmDelete": "Are you sure you want to delete this file?",
+    "deleteSuccess": "Deleted successfully",
+    "deleteFailed": "Delete failed",
+    "linkCopied": "Link copied",
+    "copyFailed": "Copy failed",
+    "uploadSuccess": "Upload complete, {count} file(s)",
+    "uploadPartial": "Upload done: {success} succeeded, {fail} failed",
+    "uploadProgress": "Uploading {current}/{total}...",
+    "loadError": "Failed to load file list"
   }
 }

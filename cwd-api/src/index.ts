@@ -39,6 +39,10 @@ import { getTelegramSettings, updateTelegramSettings, setupTelegramWebhook, test
 import { getS3Settings, updateS3Settings } from './api/admin/s3Settings';
 import { triggerS3Backup, listS3Backups, deleteS3BackupHandler, downloadS3BackupHandler } from './api/admin/triggerS3Backup';
 import { telegramWebhook } from './api/telegram/webhook';
+import { r2List } from './api/admin/r2List';
+import { r2Upload } from './api/admin/r2Upload';
+import { r2Delete } from './api/admin/r2Delete';
+import { r2Get } from './api/admin/r2Get';
 import { ensureSchema } from './utils/dbMigration';
 
 const app = new Hono<{ Bindings: Bindings }>();
@@ -351,6 +355,11 @@ app.post('/admin/backup/s3', triggerS3Backup);
 app.get('/admin/backup/s3/list', listS3Backups);
 app.delete('/admin/backup/s3', deleteS3BackupHandler);
 app.get('/admin/backup/s3/download', downloadS3BackupHandler);
+
+app.get('/admin/r2/list', r2List);
+app.post('/admin/r2/upload', r2Upload);
+app.delete('/admin/r2/delete', r2Delete);
+app.get('/admin/r2/get', r2Get);
 
 app.get('/admin/settings/admin-display', async (c) => {
 	try {

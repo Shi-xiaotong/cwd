@@ -1,4 +1,4 @@
-import { get, post, put, del } from './http';
+import { get, post, put, del, getApiBaseUrl } from './http';
 
 export type AdminLoginResponse = {
 	data: {
@@ -429,4 +429,77 @@ export function downloadS3BackupUrl(key: string): string {
 	const source = stored || rawEnvApiBaseUrl;
 	const apiBaseUrl = source.replace(/\/+$/, '');
 	return `${apiBaseUrl}/admin/backup/s3/download?key=${encodeURIComponent(key)}`;
+}
+
+export type R2FileItem = {
+	key: string;
+	name: string;
+	size: number;
+	lastModified?: string;
+	url?: string;
+	isFolder: boolean;
+	isImage: boolean;
+};
+
+export type R2ListResponse = {
+	items: R2FileItem[];
+	total: number;
+};
+
+export function fetchR2List(
+	bucket: string,
+	prefix: string,
+	page: number,
+	limit: number
+): Promise<R2ListResponse> {
+	const searchParams = new URLSearchParams();
+	searchParams.set('bucket', bucket);
+	searchParams.set('prefix', prefix);
+	searchParams.set('page', String(page));
+	searchParams.set('limit', String(limit));
+	return get<R2ListResponse>(`/admin/r2/list?${searchParams.toString()}`);
+}
+
+export function getR2FileUrl(bucket: string, key: string): string {
+	const apiBaseUrl = getApiBaseUrl();
+	return `${apiBaseUrl}/admin/r2/file?bucket=${encodeURIComponent(bucket)}&key=${encodeURIComponent(key)}`;
+}
+
+export async function uploadR2Files(
+	bucket: string,
+	prefix: string,
+	file: File
+): Promise<{ message: string; key: string }> {
+	const apiBaseUrl = getApiBaseUrl();
+	const token = localStorage.getItem('cwd_admin_token');
+	const formData = new FormData();
+	formData.append('bucket', bucket);
+	formData.append('prefix', prefix);
+	formData.append('file', file);
+
+	const res = await fetch(`${apiBaseUrl}/admin/r2/upload`, {
+		method: 'POST',
+		headers: {
+			...(token ? { Authorization: `Bearer ${token}` } : {}),
+		},
+		body: formData,
+	});
+
+	let data: any = null;
+	try {
+		data = await res.json();
+	} catch {
+		data = null;
+	}
+	if (!res.ok) {
+		const message = data && data.message ? data.message : `上传失败，状态码 ${res.status}`;
+		throw new Error(message);
+	}
+	return data;
+}
+
+export function deleteR2File(bucket: string, key: string): Promise<{ message: string }> {
+	return del<{ message: string }>(
+		`/admin/r2/delete?bucket=${encodeURIComponent(bucket)}&key=${encodeURIComponent(key)}`
+	);
 }

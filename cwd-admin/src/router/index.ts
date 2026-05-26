@@ -6,6 +6,7 @@ import SettingsView from '../views/SettingsView/index.vue';
 import DataView from '../views/DataView/index.vue';
 import StatsView from '../views/StatsView/index.vue';
 import AnalyticsVisitView from '../views/AnalyticsVisitView/index.vue';
+import R2View from '../views/R2View/index.vue';
 
 const routes: RouteRecordRaw[] = [
 	{
@@ -59,6 +60,14 @@ const routes: RouteRecordRaw[] = [
 				component: DataView,
 				meta: {
 					title: '数据管理',
+				},
+			},
+			{
+				path: 'r2',
+				name: 'r2',
+				component: R2View,
+				meta: {
+					title: 'R2 图片管理',
 				},
 			},
 		],

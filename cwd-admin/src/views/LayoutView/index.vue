@@ -120,6 +120,14 @@
             <PhDatabase class="menu-item-icon" :size="18" />
             <span>{{ t("menu.data") }}</span>
           </li>
+          <li
+            class="menu-item"
+            :class="{ active: isRouteActive('r2') }"
+            @click="goR2"
+          >
+            <PhImage class="menu-item-icon" :size="18" />
+            <span>{{ t("menu.r2") }}</span>
+          </li>
         </ul>
         <div class="layout-sider-footer" @click="openVersionModal">
           <div class="layout-sider-footer-line">
@@ -344,6 +352,11 @@ function goData() {
 
 function goSettings() {
   router.push({ name: "settings" });
+  closeSider();
+}
+
+function goR2() {
+  router.push({ name: "r2" });
   closeSider();
 }
 
