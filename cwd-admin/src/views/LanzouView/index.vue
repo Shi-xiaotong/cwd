@@ -63,16 +63,12 @@
       >
         <div class="lanzou-grid-thumb">
           <img
-            v-if="isImage(file.mime_type) && file.cover_url"
-            :src="file.cover_url"
+            :src="file.cover_url || getDefaultCover(file)"
             :alt="file.name"
             class="lanzou-grid-img"
             loading="lazy"
             @error="handleImgError($event, file)"
           />
-          <div v-else class="lanzou-grid-icon">
-            <PhFile :size="48" />
-          </div>
         </div>
         <div class="lanzou-grid-info">
           <span class="lanzou-grid-name" :title="file.name">{{ file.name }}</span>
@@ -131,12 +127,16 @@
         <div class="modal-body">
           <img
             v-if="previewFile && isImage(previewFile.mime_type)"
-            :src="previewFile.cover_url || previewFile.direct_url"
+            :src="previewFile.cover_url || previewFile.direct_url || getDefaultCover(previewFile)"
             :alt="previewFile.name"
             class="lanzou-preview-img"
           />
           <div v-else class="lanzou-preview-info">
-            <PhFile :size="64" />
+            <img
+              v-if="previewFile"
+              :src="getDefaultCover(previewFile)"
+              style="width: 80px; height: 66px; object-fit: contain;"
+            />
             <p>{{ previewFile?.name }}</p>
             <p>{{ formatSize(previewFile?.size || 0) }}</p>
           </div>
@@ -338,10 +338,31 @@ function isImage(mime: string): boolean {
   return mime?.startsWith("image/") || false;
 }
 
+function isVideo(mime: string): boolean {
+  return mime?.startsWith("video/") || false;
+}
+
+// 默认封面 SVG data URIs（内联，无需外部存储）
+const DEFAULT_COVERS = {
+  folder: `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 100"><rect width="120" height="100" rx="8" fill="#FFF3E0"/><path d="M10 30h35l8-10h57a5 5 0 015 5v60a5 5 0 01-5 5H10a5 5 0 01-5-5V35a5 5 0 015-5z" fill="#FF9800"/><rect x="15" y="45" width="90" height="40" rx="4" fill="#FFB74D"/></svg>')}`,
+  image: `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 100"><rect width="120" height="100" rx="8" fill="#E8F5E9"/><rect x="15" y="15" width="90" height="70" rx="6" fill="#4CAF50" opacity="0.15"/><circle cx="40" cy="40" r="10" fill="#FF9800"/><path d="M15 75l25-20 15 12 20-15 30 23v8a6 6 0 01-6 6H21a6 6 0 01-6-6z" fill="#4CAF50" opacity="0.6"/></svg>')}`,
+  video: `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 100"><rect width="120" height="100" rx="8" fill="#E3F2FD"/><rect x="15" y="18" width="90" height="64" rx="6" fill="#2196F3" opacity="0.15"/><polygon points="50,35 50,65 75,50" fill="#2196F3" opacity="0.8"/></svg>')}`,
+  file: `data:image/svg+xml,${encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 120 100"><rect width="120" height="100" rx="8" fill="#F5F5F5"/><path d="M30 10h40l25 25v55a5 5 0 01-5 5H30a5 5 0 01-5-5V15a5 5 0 015-5z" fill="#9E9E9E" opacity="0.2"/><path d="M70 10v25h25" fill="#BDBDBD" opacity="0.3"/><path d="M70 10l25 25H70z" fill="#BDBDBD" opacity="0.4"/></svg>')}`,
+};
+
+function getDefaultCover(file: LanzouFileItem): string {
+  if (isImage(file.mime_type)) return DEFAULT_COVERS.image;
+  if (isVideo(file.mime_type)) return DEFAULT_COVERS.video;
+  return DEFAULT_COVERS.file;
+}
+
 function handleImgError(e: Event, file: LanzouFileItem) {
   const img = e.target as HTMLImageElement;
+  // 先尝试 direct_url，再用默认封面
   if (file.direct_url && img.src !== file.direct_url) {
     img.src = file.direct_url;
+  } else {
+    img.src = getDefaultCover(file);
   }
 }
 
