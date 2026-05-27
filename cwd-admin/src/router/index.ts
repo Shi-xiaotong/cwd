@@ -7,6 +7,7 @@ import DataView from '../views/DataView/index.vue';
 import StatsView from '../views/StatsView/index.vue';
 import AnalyticsVisitView from '../views/AnalyticsVisitView/index.vue';
 import R2View from '../views/R2View/index.vue';
+import LanzouView from '../views/LanzouView/index.vue';
 
 const routes: RouteRecordRaw[] = [
 	{
@@ -18,10 +19,10 @@ const routes: RouteRecordRaw[] = [
 		path: '/',
 		component: LayoutView,
 		children: [
-			{
-				path: '',
-				redirect: '/comments',
-			},
+		{
+			path: '',
+			redirect: '/analytics',
+		},
 			{
 				path: 'comments',
 				name: 'comments',
@@ -63,14 +64,22 @@ const routes: RouteRecordRaw[] = [
 				},
 			},
 			{
-				path: 'r2',
-				name: 'r2',
-				component: R2View,
-				meta: {
-					title: 'R2 图片管理',
-				},
+			path: 'r2',
+			name: 'r2',
+			component: R2View,
+			meta: {
+				title: '图片管理',
 			},
-		],
+		},
+		{
+			path: 'lanzou',
+			name: 'lanzou',
+			component: LanzouView,
+			meta: {
+				title: '蓝奏云管理',
+			},
+		},
+	],
 	},
 ];
 

@@ -19,7 +19,21 @@ export async function r2Delete(c: Context<{ Bindings: Bindings }>) {
 		const bucket = resolveBucket(c, bucketParam);
 		if (bucket instanceof Response) return bucket;
 
+		// Delete the file
 		await bucket.delete(key);
+
+		// If deleting an original, also delete the corresponding thumb
+		// e.g. "original/photo.jpg" → also delete "thumb/photo_thumb.jpg"
+		if (key.includes('/original/')) {
+			const thumbPath = key.replace('/original/', '/thumb/').replace(/\.([^./]+)$/, '_thumb.$1');
+			try { await bucket.delete(thumbPath); } catch { /* ignore */ }
+		}
+
+		// If deleting a thumb, also delete the corresponding original
+		if (key.includes('/thumb/') && key.includes('_thumb.')) {
+			const originalPath = key.replace('/thumb/', '/original/').replace('_thumb.', '.');
+			try { await bucket.delete(originalPath); } catch { /* ignore */ }
+		}
 
 		return c.json({ message: '删除成功', key });
 	} catch (e: any) {

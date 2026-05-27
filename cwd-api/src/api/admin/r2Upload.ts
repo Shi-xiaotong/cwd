@@ -18,29 +18,60 @@ export async function r2Upload(c: Context<{ Bindings: Bindings }>) {
 
 		const formData = await c.req.formData();
 		const file = formData.get('file') as File | null;
+		const thumbFile = formData.get('thumb') as File | null;
 
 		if (!file) {
 			return c.json({ message: '缺少 file 字段' }, 400);
 		}
 
-		const key = prefix ? `${prefix.replace(/\/$/, '')}/${file.name}` : file.name;
+		const basePrefix = prefix.replace(/\/$/, '');
+		// Auto-prepend original/ if not already in a subfolder
+		const dirPrefix = basePrefix && !basePrefix.endsWith('/') ? `${basePrefix}/` : basePrefix;
+		const originalKey = dirPrefix ? `${dirPrefix}original/${file.name}` : `original/${file.name}`;
 
+		// Upload original
 		const arrayBuffer = await file.arrayBuffer();
-
 		const headers: Record<string, string> = {};
 		const contentType = file.type || (file as any).contentType;
-		if (contentType) {
-			headers['Content-Type'] = contentType;
+		if (contentType) headers['Content-Type'] = contentType;
+
+		await bucket.put(originalKey, arrayBuffer, { httpMetadata: headers });
+
+		// Upload thumbnail — thumb/photo.jpg (same filename)
+		let thumbKey: string | null = null;
+		if (thumbFile) {
+			const thumbDirPrefix = basePrefix ? `${basePrefix.replace(/original\/?$/, '')}thumb/` : 'thumb/';
+			thumbKey = `${thumbDirPrefix}${file.name}`;
+
+			const thumbBuffer = await thumbFile.arrayBuffer();
+			const thumbHeaders: Record<string, string> = {};
+			const thumbContentType = thumbFile.type || 'image/jpeg';
+			thumbHeaders['Content-Type'] = thumbContentType;
+
+			await bucket.put(thumbKey, thumbBuffer, { httpMetadata: thumbHeaders });
 		}
 
-		await bucket.put(key, arrayBuffer, {
-			httpMetadata: headers,
-		});
+		// Build URLs using custom domain for myblog bucket
+		const myblogDomain = 'https://img.233002.xyz';
+		const bucketName = bucketParam || 'wallpaper';
+		const isMyblog = bucketName === 'myblog';
+
+		const originalUrl = isMyblog
+			? `${myblogDomain}/${originalKey}`
+			: `${new URL(c.req.url).origin}/r2/file?bucket=${encodeURIComponent(bucketName)}&key=${encodeURIComponent(originalKey)}`;
+		const thumbnailUrl = thumbKey
+			? (isMyblog
+				? `${myblogDomain}/${thumbKey}`
+				: `${new URL(c.req.url).origin}/r2/file?bucket=${encodeURIComponent(bucketName)}&key=${encodeURIComponent(thumbKey)}`)
+			: originalUrl;
 
 		return c.json({
 			message: '上传成功',
-			key,
+			key: originalKey,
+			thumbKey,
 			size: arrayBuffer.byteLength,
+			originalUrl,
+			thumbnailUrl,
 		});
 	} catch (e: any) {
 		console.error('R2 Upload Error:', e);

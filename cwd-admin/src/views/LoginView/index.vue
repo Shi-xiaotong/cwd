@@ -95,7 +95,7 @@ async function handleSubmit() {
   try {
     localStorage.setItem("cwd_admin_api_base_url", normalizedApiBaseUrl);
     await loginAdmin(name.value, password.value);
-    router.push({ name: "comments" });
+    router.push({ name: "analytics" });
   } catch (e: any) {
     error.value = e.message || "登录失败";
   } finally {

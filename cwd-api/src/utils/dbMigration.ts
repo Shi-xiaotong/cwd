@@ -124,6 +124,25 @@ export async function ensureSchema(env: Bindings) {
         // Also ensure Comment index exists (just in case)
         await env.CWD_DB.prepare('CREATE INDEX IF NOT EXISTS idx_site_id ON Comment(site_id)').run();
 
+
+	// 5. Create lanzou_files table
+	await env.CWD_DB.prepare(`
+		CREATE TABLE IF NOT EXISTS lanzou_files (
+			id INTEGER PRIMARY KEY AUTOINCREMENT,
+			name TEXT NOT NULL,
+			size INTEGER NOT NULL DEFAULT 0,
+			mime_type TEXT DEFAULT '',
+			cover_url TEXT DEFAULT '',
+			lanzou_id TEXT DEFAULT '',
+			lanzou_fid TEXT DEFAULT '',
+			lanzou_password TEXT DEFAULT '',
+			lanzou_share_url TEXT DEFAULT '',
+			direct_url TEXT DEFAULT '',
+			folder_id TEXT DEFAULT '',
+			created_at INTEGER NOT NULL
+		)
+	`).run();
+
 	} catch (e) {
 		console.error('Database migration failed:', e);
 		// Don't throw, to allow app to start, but log error. 

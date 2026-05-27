@@ -43,6 +43,12 @@ import { r2List } from './api/admin/r2List';
 import { r2Upload } from './api/admin/r2Upload';
 import { r2Delete } from './api/admin/r2Delete';
 import { r2Get } from './api/admin/r2Get';
+import { lanzouList } from './api/admin/lanzouList';
+import { lanzouUpload } from './api/admin/lanzouUpload';
+import { lanzouDelete } from './api/admin/lanzouDelete';
+import { lanzouDetail } from './api/admin/lanzouDetail';
+import { getLanzouSettings, updateLanzouSettings } from './api/admin/lanzouSettings';
+import { lanzouUploadUrl } from './api/admin/lanzouUploadUrl';
 import { ensureSchema } from './utils/dbMigration';
 
 const app = new Hono<{ Bindings: Bindings }>();
@@ -291,6 +297,35 @@ app.get('/api/config/comments', async (c) => {
 	}
 });
 
+// Public R2 file serving (no auth required) — for thumbnails and sharing
+app.get('/r2/file', async (c) => {
+	try {
+		const key = c.req.query('key');
+		if (!key) return c.json({ message: '缺少 key 参数' }, 400);
+
+		const bucketParam = c.req.query('bucket');
+		const name = bucketParam || 'wallpaper';
+		let bucket: R2Bucket;
+		if (name === 'wallpaper') bucket = c.env.WALLPAPER_BUCKET;
+		else if (name === 'myblog') bucket = c.env.MYBLOG_BUCKET;
+		else if (name === 'lanzou') bucket = c.env.LANZOU_BUCKET;
+		else return c.json({ message: `未知的 bucket: ${name}` }, 400);
+
+		const object = await bucket.get(key);
+		if (!object) return c.json({ message: `文件不存在: ${key}` }, 404);
+
+		const headers: Record<string, string> = {};
+		const contentType = object.httpMetadata?.contentType;
+		if (contentType) headers['Content-Type'] = contentType;
+		headers['Content-Length'] = String(object.size);
+		headers['Cache-Control'] = 'public, max-age=31536000';
+
+		return new Response(object.body, { headers });
+	} catch (e: any) {
+		return c.json({ message: e.message || '获取文件失败' }, 500);
+	}
+});
+
 app.post('/admin/login', adminLogin);
 app.use('/admin/*', adminAuth);
 app.delete('/admin/comments/delete', deleteComment);
@@ -360,6 +395,14 @@ app.get('/admin/r2/list', r2List);
 app.post('/admin/r2/upload', r2Upload);
 app.delete('/admin/r2/delete', r2Delete);
 app.get('/admin/r2/get', r2Get);
+
+app.get('/admin/lanzou/list', lanzouList);
+app.post('/admin/lanzou/upload', lanzouUpload);
+app.delete('/admin/lanzou/delete', lanzouDelete);
+app.get('/admin/lanzou/detail', lanzouDetail);
+app.get('/admin/lanzou/settings', getLanzouSettings);
+app.put('/admin/lanzou/settings', updateLanzouSettings);
+app.post('/admin/lanzou/upload-url', lanzouUploadUrl);
 
 app.get('/admin/settings/admin-display', async (c) => {
 	try {

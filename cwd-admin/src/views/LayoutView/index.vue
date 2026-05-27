@@ -80,53 +80,76 @@
           </select>
         </div>
         <ul class="menu">
-          <li
-            class="menu-item"
-            :class="{ active: isRouteActive('comments') }"
-            @click="goComments"
-          >
-            <PhChatCircleDots class="menu-item-icon" :size="18" />
-            <span>{{ t("menu.comments") }}</span>
+          <li class="menu-section">
+            <div class="menu-section-label">{{ t("menu.section.comments") }}</div>
+            <ul class="menu">
+              <li
+                class="menu-item"
+                :class="{ active: isRouteActive('comments') }"
+                @click="goComments"
+              >
+                <PhChatCircleDots class="menu-item-icon" :size="18" />
+                <span>{{ t("menu.comments") }}</span>
+              </li>
+              <li
+                class="menu-item"
+                :class="{ active: isRouteActive('stats') }"
+                @click="goStats"
+              >
+                <PhSquaresFour class="menu-item-icon" :size="18" />
+                <span>{{ t("menu.stats") }}</span>
+              </li>
+              <li
+                class="menu-item"
+                :class="{ active: isRouteActive('analytics') }"
+                @click="goAnalytics"
+              >
+                <PhChartBar class="menu-item-icon" :size="18" />
+                <span>{{ t("menu.analytics") }}</span>
+              </li>
+            </ul>
           </li>
-          <li
-            class="menu-item"
-            :class="{ active: isRouteActive('stats') }"
-            @click="goStats"
-          >
-            <PhSquaresFour class="menu-item-icon" :size="18" />
-            <span>{{ t("menu.stats") }}</span>
+          <li class="menu-section">
+            <div class="menu-section-label">{{ t("menu.section.storage") }}</div>
+            <ul class="menu">
+              <li
+                class="menu-item"
+                :class="{ active: isRouteActive('r2') }"
+                @click="goR2"
+              >
+                <PhImage class="menu-item-icon" :size="18" />
+                <span>{{ t("menu.r2") }}</span>
+              </li>
+              <li
+                class="menu-item"
+                :class="{ active: isRouteActive('lanzou') }"
+                @click="goLanzou"
+              >
+                <PhCloudArrowUp class="menu-item-icon" :size="18" />
+                <span>{{ t("menu.lanzou") }}</span>
+              </li>
+            </ul>
           </li>
-          <li
-            class="menu-item"
-            :class="{ active: isRouteActive('analytics') }"
-            @click="goAnalytics"
-          >
-            <PhChartBar class="menu-item-icon" :size="18" />
-            <span>{{ t("menu.analytics") }}</span>
-          </li>
-          <li
-            class="menu-item"
-            :class="{ active: isRouteActive('settings') }"
-            @click="goSettings"
-          >
-            <PhGear class="menu-item-icon" :size="18" />
-            <span>{{ t("menu.settings") }}</span>
-          </li>
-          <li
-            class="menu-item"
-            :class="{ active: isRouteActive('data') }"
-            @click="goData"
-          >
-            <PhDatabase class="menu-item-icon" :size="18" />
-            <span>{{ t("menu.data") }}</span>
-          </li>
-          <li
-            class="menu-item"
-            :class="{ active: isRouteActive('r2') }"
-            @click="goR2"
-          >
-            <PhImage class="menu-item-icon" :size="18" />
-            <span>{{ t("menu.r2") }}</span>
+          <li class="menu-section">
+            <div class="menu-section-label">{{ t("menu.section.system") }}</div>
+            <ul class="menu">
+              <li
+                class="menu-item"
+                :class="{ active: isRouteActive('data') }"
+                @click="goData"
+              >
+                <PhDatabase class="menu-item-icon" :size="18" />
+                <span>{{ t("menu.data") }}</span>
+              </li>
+              <li
+                class="menu-item"
+                :class="{ active: isRouteActive('settings') }"
+                @click="goSettings"
+              >
+                <PhGear class="menu-item-icon" :size="18" />
+                <span>{{ t("menu.settings") }}</span>
+              </li>
+            </ul>
           </li>
         </ul>
         <div class="layout-sider-footer" @click="openVersionModal">
@@ -357,6 +380,11 @@ function goSettings() {
 
 function goR2() {
   router.push({ name: "r2" });
+  closeSider();
+}
+
+function goLanzou() {
+  router.push({ name: "lanzou" });
   closeSider();
 }
 

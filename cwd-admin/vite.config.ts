@@ -7,4 +7,14 @@ export default defineConfig({
 		host: true,
 		port: 1226,
 	},
+	build: {
+		rollupOptions: {
+			output: {
+				manualChunks: {
+					vendor: ['vue', 'vue-router', 'vue-i18n'],
+					icons: ['@phosphor-icons/vue'],
+				},
+			},
+		},
+	},
 });

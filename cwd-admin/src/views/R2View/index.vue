@@ -78,8 +78,8 @@
       >
         <div class="r2-grid-thumb">
           <img
-            v-if="item.isImage && item.url"
-            :src="item.url"
+            v-if="item.isImage && item.thumbnailUrl"
+            :src="item.thumbnailUrl"
             :alt="item.name"
             class="r2-grid-img"
             loading="lazy"
@@ -292,7 +292,12 @@ async function handleFileSelect(event: Event) {
 
   for (const file of fileArray) {
     try {
-      await uploadR2Files(currentBucket.value, currentPrefix.value, file);
+      // Generate thumbnail for images
+      let thumbFile: File | null = null;
+      if (file.type.startsWith("image/")) {
+        thumbFile = await generateThumbnail(file);
+      }
+      await uploadR2Files(currentBucket.value, currentPrefix.value, file, thumbFile);
       successCount++;
     } catch {
       failCount++;
@@ -312,6 +317,45 @@ async function handleFileSelect(event: Event) {
   }
 
   loadFiles();
+}
+
+// Generate thumbnail using Canvas — 400px width, proportional scale, JPEG quality 80
+function generateThumbnail(file: File): Promise<File> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    const url = URL.createObjectURL(file);
+    img.onload = () => {
+      URL.revokeObjectURL(url);
+      const MAX_WIDTH = 400;
+      let { width, height } = img;
+      if (width > MAX_WIDTH) {
+        height = Math.round((height * MAX_WIDTH) / width);
+        width = MAX_WIDTH;
+      }
+      const canvas = document.createElement("canvas");
+      canvas.width = width;
+      canvas.height = height;
+      const ctx = canvas.getContext("2d")!;
+      ctx.drawImage(img, 0, 0, width, height);
+      canvas.toBlob(
+        (blob) => {
+          if (blob) {
+            const stem = file.name.replace(/\.[^.]+$/, "");
+            resolve(new File([blob], `${stem}_thumb.jpg`, { type: "image/jpeg" }));
+          } else {
+            resolve(file); // fallback: use original
+          }
+        },
+        "image/jpeg",
+        0.8
+      );
+    };
+    img.onerror = () => {
+      URL.revokeObjectURL(url);
+      resolve(file); // fallback: use original
+    };
+    img.src = url;
+  });
 }
 
 // Copy Link
@@ -349,13 +393,18 @@ async function confirmDelete() {
   }
 }
 
-// Image error fallback
+// Image error fallback — try original URL if thumbnail fails
 function handleImgError(event: Event, item: R2FileItem) {
   const img = event.target as HTMLImageElement;
-  img.style.display = "none";
-  const parent = img.parentElement;
-  if (parent) {
-    parent.classList.add("r2-grid-thumb-fallback");
+  // If currently showing thumbnail and original is different, fallback to original
+  if (item.url && img.src !== item.url) {
+    img.src = item.url;
+  } else {
+    img.style.display = "none";
+    const parent = img.parentElement;
+    if (parent) {
+      parent.classList.add("r2-grid-thumb-fallback");
+    }
   }
 }
 
