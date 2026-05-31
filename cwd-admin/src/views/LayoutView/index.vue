@@ -130,6 +130,19 @@
               </li>
             </ul>
           </li>
+          <li class="menu-section">
+            <div class="menu-section-label">{{ t("menu.section.tools") }}</div>
+            <ul class="menu">
+              <li
+                class="menu-item"
+                :class="{ active: isRouteActive('jxpan') }"
+                @click="goJxPan"
+              >
+                <PhCloudArrowDown class="menu-item-icon" :size="18" />
+                <span>{{ t("menu.jxpan") }}</span>
+              </li>
+            </ul>
+          </li>
         </ul>
         <div class="layout-sider-footer" @click="openVersionModal">
           <div class="layout-sider-footer-line">
@@ -354,6 +367,11 @@ function goData() {
 
 function goSettings() {
   router.push({ name: "settings" });
+  closeSider();
+}
+
+function goJxPan() {
+  router.push({ name: "jxpan" });
   closeSider();
 }
 

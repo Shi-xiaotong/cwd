@@ -6,6 +6,7 @@ import SettingsView from '../views/SettingsView/index.vue';
 import DataView from '../views/DataView/index.vue';
 import StatsView from '../views/StatsView/index.vue';
 import AnalyticsVisitView from '../views/AnalyticsVisitView/index.vue';
+import JxPanView from '../views/JxPanView/index.vue';
 
 
 const routes: RouteRecordRaw[] = [
@@ -54,15 +55,23 @@ const routes: RouteRecordRaw[] = [
 					title: '网站设置',
 				},
 			},
-			{
-				path: 'data',
-				name: 'data',
-				component: DataView,
-				meta: {
-					title: '数据管理',
-				},
+		{
+			path: 'data',
+			name: 'data',
+			component: DataView,
+			meta: {
+				title: '数据管理',
+			},
 		},
-	],
+		{
+			path: 'jxpan',
+			name: 'jxpan',
+			component: JxPanView,
+			meta: {
+				title: '网盘解析',
+			},
+		},
+],
 	},
 ];
 
