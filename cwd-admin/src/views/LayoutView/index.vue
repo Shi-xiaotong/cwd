@@ -110,27 +110,6 @@
             </ul>
           </li>
           <li class="menu-section">
-            <div class="menu-section-label">{{ t("menu.section.storage") }}</div>
-            <ul class="menu">
-              <li
-                class="menu-item"
-                :class="{ active: isRouteActive('r2') }"
-                @click="goR2"
-              >
-                <PhImage class="menu-item-icon" :size="18" />
-                <span>{{ t("menu.r2") }}</span>
-              </li>
-              <li
-                class="menu-item"
-                :class="{ active: isRouteActive('lanzou') }"
-                @click="goLanzou"
-              >
-                <PhCloudArrowUp class="menu-item-icon" :size="18" />
-                <span>{{ t("menu.lanzou") }}</span>
-              </li>
-            </ul>
-          </li>
-          <li class="menu-section">
             <div class="menu-section-label">{{ t("menu.section.system") }}</div>
             <ul class="menu">
               <li
@@ -378,15 +357,7 @@ function goSettings() {
   closeSider();
 }
 
-function goR2() {
-  router.push({ name: "r2" });
-  closeSider();
-}
 
-function goLanzou() {
-  router.push({ name: "lanzou" });
-  closeSider();
-}
 
 function openDocs() {
   window.open("https://cwd.js.org", "_blank");

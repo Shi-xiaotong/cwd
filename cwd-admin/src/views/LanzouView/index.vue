@@ -921,4 +921,59 @@ onMounted(() => {
   0% { left: -40%; }
   100% { left: 100%; }
 }
+
+@media (max-width: 768px) {
+  .lanzou-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .lanzou-toolbar-left {
+    min-width: 0;
+  }
+
+  .lanzou-search {
+    max-width: 100%;
+  }
+
+  .lanzou-toolbar-right {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .lanzou-count {
+    width: 100%;
+    margin-bottom: 4px;
+  }
+
+  .lanzou-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  .lanzou-grid-item {
+    min-width: 0;
+  }
+
+  .lanzou-grid-name {
+    font-size: 11px;
+  }
+
+  .lanzou-grid-meta {
+    font-size: 10px;
+  }
+
+  .lanzou-pagination {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+
+  .lanzou-preview-modal {
+    max-width: 95vw;
+  }
+
+  .lanzou-preview-img {
+    max-height: 50vh;
+  }
+}
 </style>

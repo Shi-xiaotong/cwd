@@ -732,4 +732,41 @@ onMounted(() => {
   outline: 2px solid var(--primary-color);
   outline-offset: 2px;
 }
+
+@media (max-width: 768px) {
+  .r2-toolbar {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .r2-toolbar-left {
+    flex-wrap: wrap;
+  }
+
+  .r2-toolbar-right {
+    flex-wrap: wrap;
+    justify-content: flex-start;
+  }
+
+  .r2-grid {
+    grid-template-columns: repeat(2, 1fr) !important;
+    gap: 8px !important;
+  }
+
+  .r2-grid-item {
+    min-width: 0;
+  }
+
+  .r2-grid-name {
+    font-size: 11px;
+  }
+
+  .r2-grid-size {
+    font-size: 10px;
+  }
+
+  .r2-breadcrumb {
+    font-size: 12px;
+  }
+}
 </style>
