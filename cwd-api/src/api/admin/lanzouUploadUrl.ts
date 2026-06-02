@@ -135,11 +135,11 @@ export async function lanzouUploadUrl(c: Context<{ Bindings: Bindings }>) {
                 // For now, store a small version by uploading to R2
                 const stem = fileName.replace(/\.[^.]+$/, '');
                 const ext = fileName.split('.').pop() || 'jpg';
-                const coverKey = `cover/${stem}.${ext}`;
-                await c.env.LANZOU_BUCKET.put(coverKey, arrayBuffer, {
+                const coverKey = `covers/${stem}.${ext}`;
+                await c.env.WALLPAPER_BUCKET.put(coverKey, arrayBuffer, {
                     httpMetadata: { contentType: contentType },
                 });
-                coverUrl = `https://lanzou-thumb.233002.xyz/${coverKey}`;
+                coverUrl = `https://wallpaper.233002.xyz/${coverKey}`;
             } catch {}
         }
 

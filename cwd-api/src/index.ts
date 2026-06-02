@@ -308,7 +308,6 @@ app.get('/r2/file', async (c) => {
 		let bucket: R2Bucket;
 		if (name === 'wallpaper') bucket = c.env.WALLPAPER_BUCKET;
 		else if (name === 'myblog') bucket = c.env.MYBLOG_BUCKET;
-		else if (name === 'lanzou') bucket = c.env.LANZOU_BUCKET;
 		else return c.json({ message: `未知的 bucket: ${name}` }, 400);
 
 		const object = await bucket.get(key);

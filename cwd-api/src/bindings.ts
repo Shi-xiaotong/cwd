@@ -3,7 +3,6 @@ export type Bindings = {
   CWD_AUTH_KV: KVNamespace;
   WALLPAPER_BUCKET: R2Bucket;
   MYBLOG_BUCKET: R2Bucket;
-  LANZOU_BUCKET: R2Bucket;
   ALLOW_ORIGIN: string
   MAIL_GATEWAY_URL?: string
   MAIL_GATEWAY_TOKEN?: string

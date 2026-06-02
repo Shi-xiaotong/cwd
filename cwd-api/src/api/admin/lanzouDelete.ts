@@ -63,7 +63,7 @@ export async function lanzouDelete(c: Context<{ Bindings: Bindings }>) {
         if (coverUrl) {
             try {
                 const coverKey = coverUrl.split('/').slice(-2).join('/');
-                await c.env.LANZOU_BUCKET.delete(coverKey);
+                await c.env.WALLPAPER_BUCKET.delete(coverKey);
             } catch {}
         }
 

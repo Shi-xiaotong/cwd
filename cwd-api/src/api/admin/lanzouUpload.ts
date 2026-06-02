@@ -78,14 +78,14 @@ export async function lanzouUpload(c: Context<{ Bindings: Bindings }>) {
         if (coverFile) {
             const stem = file.name.replace(/\.[^.]+$/, '');
             const ext = coverFile.name.split('.').pop() || 'jpg';
-            const coverKey = `cover/${stem}.${ext}`;
+            const coverKey = `covers/${stem}.${ext}`;
             const coverBuffer = await coverFile.arrayBuffer();
             const coverHeaders: Record<string, string> = {};
             const coverContentType = coverFile.type || 'image/jpeg';
             coverHeaders['Content-Type'] = coverContentType;
-            await c.env.LANZOU_BUCKET.put(coverKey, coverBuffer, { httpMetadata: coverHeaders });
+            await c.env.WALLPAPER_BUCKET.put(coverKey, coverBuffer, { httpMetadata: coverHeaders });
             // Use custom domain for cover
-            coverUrl = `https://lanzou-thumb.233002.xyz/${coverKey}`;
+            coverUrl = `https://wallpaper.233002.xyz/${coverKey}`;
         }
 
         // Save to D1
