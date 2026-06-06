@@ -2,10 +2,11 @@
   <div class="page">
     <h2 class="page-title">用户管理</h2>
     <div v-if="!adminSecret" class="page-hint">
-      <p>请先配置 Admin Secret：</p>
+      <p style="margin-bottom:4px">🔐 影视屋管理密钥（首次需要配置，之后自动记住）</p>
+      <p style="font-size:12px;color:var(--text-secondary)">密钥与后台登录密码不同，是 FFZY 服务的独立验证。</p>
       <div style="display:flex;gap:8px;margin-top:8px">
         <input v-model="secretInput" type="text" placeholder="输入 ADMIN_SECRET" class="toolbar-input" style="max-width:300px" />
-        <button class="toolbar-button" @click="saveSecret">保存</button>
+        <button class="toolbar-button" @click="saveSecret">保存并进入</button>
       </div>
     </div>
     <template v-else>

@@ -10,15 +10,30 @@
         </div>
         <div class="meta-field">
           <label>Slug</label>
-          <input v-model="form.slug" type="text" placeholder="article-url-slug" />
+          <input v-model="form.slug" type="text" placeholder="自动生成或手动输入" />
+          <span class="field-hint" title="URL 路径。如 'ai-tools' → 233002.xyz/tech/ai-tools.html">🔗</span>
         </div>
       </div>
       <div class="meta-row">
         <div class="meta-field">
           <label>分类</label>
-          <select v-model="form.category">
-            <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
-          </select>
+          <div class="category-input-wrap">
+            <select v-model="form.category">
+              <option v-for="cat in categories" :key="cat" :value="cat">{{ cat }}</option>
+            </select>
+            <input
+              v-if="showNewCategory"
+              v-model="newCategoryName"
+              type="text"
+              placeholder="新分类名(英文)"
+              class="new-cat-input"
+              @keydown.enter="addCategory"
+            />
+            <button class="btn-sm" @click="showNewCategory = !showNewCategory" :title="showNewCategory ? '取消' : '新增分类'">
+              {{ showNewCategory ? '✕' : '＋' }}
+            </button>
+            <button v-if="showNewCategory && newCategoryName" class="btn-sm btn-primary-sm" @click="addCategory">确定</button>
+          </div>
         </div>
         <div class="meta-field flex-2">
           <label>摘要 (公众号)</label>
@@ -34,9 +49,23 @@
         <div class="pane-header">
           <span>Markdown</span>
           <div class="pane-actions">
-            <button class="btn-sm" @click="insertImagePlaceholder" title="插入图片占位符">🖼 图片</button>
-            <button class="btn-sm" @click="insertBold" title="粗体">B</button>
-            <button class="btn-sm" @click="insertHeading" title="标题">H</button>
+              <button class="btn-sm" @click="insertBold" title="粗体 (Ctrl+B)"><strong>B</strong></button>
+              <button class="btn-sm" @click="insertItalic" title="斜体 (Ctrl+I)"><em>I</em></button>
+              <button class="btn-sm" @click="insertCode" title="行内代码">&lt;/&gt;</button>
+              <span class="toolbar-divider"></span>
+              <button class="btn-sm" @click="insertHeading" title="二级标题">H2</button>
+              <button class="btn-sm" @click="insertHeading3" title="三级标题">H3</button>
+              <span class="toolbar-divider"></span>
+              <button class="btn-sm" @click="insertQuote" title="引用块">❝</button>
+              <button class="btn-sm" @click="insertUl" title="无序列表">• 列表</button>
+              <button class="btn-sm" @click="insertOl" title="有序列表">1. 列表</button>
+              <button class="btn-sm" @click="insertTable" title="插入表格">📊</button>
+              <button class="btn-sm" @click="insertHr" title="分割线">—</button>
+              <button class="btn-sm" @click="insertCodeBlock" title="代码块">```</button>
+              <span class="toolbar-divider"></span>
+              <button class="btn-sm btn-upload" @click="triggerFileUpload" title="上传图片（也可拖拽到编辑区）">🖼 上传图片</button>
+              <input ref="fileInputRef" type="file" accept="image/*" multiple style="display:none" @change="handleFileSelect" />
+              <button class="btn-sm" @click="insertImagePlaceholder" title="插入图片占位符">📷 占位符</button>
           </div>
         </div>
         <div
@@ -83,6 +112,7 @@
         >
           <img :src="img.url" :alt="`IMG_${index + 1}`" />
           <span class="image-label">IMG_{{ index + 1 }}</span>
+          <button class="image-delete" @click.stop="removeImage(index)" title="删除此图片">✕</button>
         </div>
       </div>
     </div>
@@ -129,9 +159,46 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, nextTick } from 'vue';
-import { uploadR2File, editorPublish, uploadWechatImage, uploadWechatThumb } from '../../api/admin';
+import { uploadR2File, deleteR2File, editorPublish, uploadWechatImage, uploadWechatThumb } from '../../api/admin';
 
-const categories = ['tech', 'history', 'anime', 'science', 'games', 'recommendations', 'life'];
+const categories = ref(['tech', 'history', 'anime', 'science', 'games', 'recommendations', 'life']);
+const showNewCategory = ref(false);
+const newCategoryName = ref('');
+const fileInputRef = ref<HTMLInputElement | null>(null);
+
+function addCategory() {
+  const name = newCategoryName.value.trim().toLowerCase().replace(/[^a-z0-9-]/g, '');
+  if (name && !categories.value.includes(name)) {
+    categories.value.push(name);
+    form.value.category = name;
+  }
+  newCategoryName.value = '';
+  showNewCategory.value = false;
+}
+
+// Auto-generate slug from title
+watch(() => form.value.title, (title) => {
+  if (!title) return;
+  // Only auto-generate if user hasn't manually edited slug
+  if (form.value.slug && form.value.slug !== autoSlug.value) return;
+  autoSlug.value = titleToSlug(title);
+  form.value.slug = autoSlug.value;
+});
+
+const autoSlug = ref('');
+
+function titleToSlug(title: string): string {
+  // Extract English words and numbers
+  const englishParts = title.match(/[a-zA-Z0-9]+/g);
+  if (englishParts && englishParts.length >= 2) {
+    return englishParts.join('-').toLowerCase().substring(0, 60);
+  }
+  // For Chinese titles, use timestamp-based slug
+  const now = new Date();
+  const dateStr = `${now.getFullYear()}${String(now.getMonth()+1).padStart(2,'0')}${String(now.getDate()).padStart(2,'0')}`;
+  const hash = title.length.toString(16);
+  return `post-${dateStr}-${hash}`;
+}
 
 const form = ref({
   title: '',
@@ -316,8 +383,44 @@ function insertBold() {
   insertAtCursor('**粗体文字**');
 }
 
+function insertItalic() {
+  insertAtCursor('*斜体文字*');
+}
+
+function insertCode() {
+  insertAtCursor('`代码`');
+}
+
 function insertHeading() {
   insertAtCursor('\n## 标题\n');
+}
+
+function insertHeading3() {
+  insertAtCursor('\n### 小标题\n');
+}
+
+function insertQuote() {
+  insertAtCursor('\n> 引用内容\n');
+}
+
+function insertUl() {
+  insertAtCursor('\n- 列表项\n- 列表项\n- 列表项\n');
+}
+
+function insertOl() {
+  insertAtCursor('\n1. 第一项\n2. 第二项\n3. 第三项\n');
+}
+
+function insertTable() {
+  insertAtCursor('\n| 列1 | 列2 | 列3 |\n|------|------|------|\n| 内容 | 内容 | 内容 |\n');
+}
+
+function insertHr() {
+  insertAtCursor('\n\n---\n\n');
+}
+
+function insertCodeBlock() {
+  insertAtCursor('\n```\n代码块\n```\n');
 }
 
 function insertAtCursor(text: string) {
@@ -338,6 +441,20 @@ function syncScroll() {
   if (!ta || !preview) return;
   const ratio = ta.scrollTop / (ta.scrollHeight - ta.clientHeight);
   preview.scrollTop = ratio * (preview.scrollHeight - preview.clientHeight);
+}
+
+function triggerFileUpload() {
+  fileInputRef.value?.click();
+}
+
+async function handleFileSelect(e: Event) {
+  const input = e.target as HTMLInputElement;
+  if (!input.files) return;
+  for (const file of Array.from(input.files)) {
+    if (!file.type.startsWith('image/')) continue;
+    await uploadImage(file);
+  }
+  input.value = ''; // Reset so same file can be selected again
 }
 
 async function handleDrop(e: DragEvent) {
@@ -361,6 +478,35 @@ async function uploadImage(file: File) {
   }
 }
 
+async function removeImage(index: number) {
+  const img = uploadedImages.value[index];
+  if (!img) return;
+
+  // Remove image reference from content
+  const placeholder = `![img](IMG_${index + 1})`;
+  form.value.content = form.value.content.replace(placeholder, '');
+
+  // Delete from R2
+  try {
+    const url = new URL(img.url);
+    const key = url.pathname.substring(1);
+    await deleteR2File('myblog', key);
+  } catch (e) {
+    console.warn('R2 delete failed:', e);
+  }
+
+  // Remove from list
+  uploadedImages.value.splice(index, 1);
+
+  // Re-number remaining image references
+  form.value.content = form.value.content.replace(/!\[img\]\(IMG_(\d+)\)/g, (match, num) => {
+    const oldIdx = parseInt(num);
+    if (oldIdx > index + 1) return `![img](IMG_${oldIdx - 1})`;
+    return match;
+  });
+
+  publishStatus.value = { type: 'success', message: '图片已删除' };
+}
 function handleDryRun() {
   // Just show the HTML in a new window
   const html = previewHtml.value;
@@ -541,6 +687,58 @@ async function handlePublish() {
   background: var(--bg-hover, #f0f0f0);
 }
 
+.btn-sm.btn-upload {
+  background: #e8f0fe;
+  color: #1a73e8;
+  border-color: #1a73e8;
+  font-weight: 600;
+}
+
+.btn-sm.btn-primary-sm {
+  background: #1a73e8;
+  color: #fff;
+  border-color: #1a73e8;
+}
+
+.toolbar-divider {
+  width: 1px;
+  height: 16px;
+  background: var(--border-color, #e0e0e0);
+  margin: 0 2px;
+}
+
+.field-hint {
+  cursor: help;
+  font-size: 14px;
+  min-width: 20px;
+  text-align: center;
+}
+
+.category-input-wrap {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+  flex: 1;
+}
+
+.category-input-wrap select {
+  flex: 1;
+  padding: 6px 10px;
+  border: 1px solid var(--border-color, #d0d0d0);
+  border-radius: 6px;
+  font-size: 14px;
+  background: var(--bg-primary, #fff);
+  color: var(--text-primary, #333);
+}
+
+.new-cat-input {
+  width: 100px;
+  padding: 4px 8px;
+  border: 1px solid #1a73e8;
+  border-radius: 4px;
+  font-size: 13px;
+}
+
 .editor-dropzone {
   flex: 1;
   position: relative;
@@ -690,6 +888,28 @@ async function handlePublish() {
   font-size: 9px;
   text-align: center;
   padding: 1px;
+}
+
+.image-delete {
+  position: absolute;
+  top: 2px;
+  right: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 50%;
+  background: rgba(233, 69, 96, 0.85);
+  color: #fff;
+  border: none;
+  font-size: 10px;
+  line-height: 18px;
+  text-align: center;
+  cursor: pointer;
+  padding: 0;
+  display: none;
+}
+
+.image-thumb:hover .image-delete {
+  display: block;
 }
 
 .editor-actions {
