@@ -81,6 +81,18 @@
         </div>
         <ul class="menu">
           <li class="menu-section">
+            <ul class="menu">
+              <li
+                class="menu-item"
+                :class="{ active: isRouteActive('analytics') }"
+                @click="goAnalytics"
+              >
+                <PhChartBar class="menu-item-icon" :size="18" />
+                <span>{{ t("menu.analytics") }}</span>
+              </li>
+            </ul>
+          </li>
+          <li class="menu-section">
             <div class="menu-section-label">{{ t("menu.section.comments") }}</div>
             <ul class="menu">
               <li
@@ -98,14 +110,6 @@
               >
                 <PhSquaresFour class="menu-item-icon" :size="18" />
                 <span>{{ t("menu.stats") }}</span>
-              </li>
-              <li
-                class="menu-item"
-                :class="{ active: isRouteActive('analytics') }"
-                @click="goAnalytics"
-              >
-                <PhChartBar class="menu-item-icon" :size="18" />
-                <span>{{ t("menu.analytics") }}</span>
               </li>
             </ul>
           </li>
