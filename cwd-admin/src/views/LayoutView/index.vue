@@ -111,6 +111,19 @@
           </li>
 
           <li class="menu-section">
+            <div class="menu-section-label">内容</div>
+            <ul class="menu">
+              <li
+                class="menu-item"
+                :class="{ active: isRouteActive('editor') }"
+                @click="goEditor"
+              >
+                <PhPencilSimple class="menu-item-icon" :size="18" />
+                <span>写文章</span>
+              </li>
+            </ul>
+          </li>
+          <li class="menu-section">
             <div class="menu-section-label">{{ t("menu.section.system") }}</div>
             <ul class="menu">
               <li
@@ -368,6 +381,11 @@ function goSettings() {
 
 function goUsers() {
   router.push({ name: "users" });
+  closeSider();
+}
+
+function goEditor() {
+  router.push({ name: "editor" });
   closeSider();
 }
 

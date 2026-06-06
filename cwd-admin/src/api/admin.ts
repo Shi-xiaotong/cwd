@@ -508,3 +508,56 @@ export function deleteR2File(bucket: string, key: string): Promise<{ message: st
 		`/admin/r2/delete?bucket=${encodeURIComponent(bucket)}&key=${encodeURIComponent(key)}`
 	);
 }
+
+// ===== Editor =====
+
+export async function uploadR2File(file: File, bucket: string, prefix: string): Promise<any> {
+	const apiBaseUrl = getApiBaseUrl();
+	const token = localStorage.getItem('cwd_admin_token');
+	const formData = new FormData();
+	formData.append('file', file);
+	const res = await fetch(
+		`${apiBaseUrl}/admin/r2/upload?bucket=${encodeURIComponent(bucket)}&prefix=${encodeURIComponent(prefix)}`,
+		{
+			method: 'POST',
+			headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+			body: formData,
+		}
+	);
+	if (!res.ok) {
+		const data = await res.json().catch(() => ({}));
+		throw new Error(data.message || `上传失败 ${res.status}`);
+	}
+	return res.json();
+}
+
+export function editorPublish(data: {
+	title: string;
+	slug: string;
+	category: string;
+	content: string;
+	digest?: string;
+	coverUrl?: string;
+	createWechatDraft?: boolean;
+	wechatImageUrls?: string[];
+	thumbMediaId?: string;
+}): Promise<any> {
+	return post('/admin/editor/publish', data);
+}
+
+export async function uploadWechatImage(imageUrl: string): Promise<string> {
+	const apiBaseUrl = getApiBaseUrl();
+	const token = localStorage.getItem('cwd_admin_token');
+	// First download the image, then upload to WeChat
+	const res = await fetch(`${apiBaseUrl}/admin/r2/upload?bucket=myblog&prefix=wechat`, {
+		method: 'POST',
+		headers: { ...(token ? { Authorization: `Bearer ${token}` } : {}) },
+	});
+	// For now, return the URL directly — Worker will handle WeChat upload
+	return imageUrl;
+}
+
+export async function uploadWechatThumb(imageUrl: string): Promise<string> {
+	// Placeholder — actual WeChat upload happens in Worker during publish
+	return '';
+}

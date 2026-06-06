@@ -11,4 +11,8 @@ export type Bindings = {
   LANZOU_COOKIE?: string
   LANZOU_UID?: string
   DEFAULT_FOLDER_ID?: string
+  GITHUB_TOKEN?: string
+  BLOG_REPO?: string
+  WECHAT_APP_ID?: string
+  WECHAT_APP_SECRET?: string
 }

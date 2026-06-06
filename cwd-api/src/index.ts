@@ -44,6 +44,8 @@ import { r2Upload } from './api/admin/r2Upload';
 import { r2Delete } from './api/admin/r2Delete';
 import { r2Get } from './api/admin/r2Get';
 
+import { editorPublish } from './api/admin/editorPublish';
+
 import { ensureSchema } from './utils/dbMigration';
 
 const app = new Hono<{ Bindings: Bindings }>();
@@ -390,6 +392,8 @@ app.post('/admin/r2/upload', r2Upload);
 app.delete('/admin/r2/delete', r2Delete);
 app.get('/admin/r2/get', r2Get);
 
+// Editor
+app.post('/admin/editor/publish', editorPublish);
 
 
 app.get('/admin/settings/admin-display', async (c) => {
