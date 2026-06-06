@@ -43,12 +43,7 @@ import { r2List } from './api/admin/r2List';
 import { r2Upload } from './api/admin/r2Upload';
 import { r2Delete } from './api/admin/r2Delete';
 import { r2Get } from './api/admin/r2Get';
-import { lanzouList } from './api/admin/lanzouList';
-import { lanzouUpload } from './api/admin/lanzouUpload';
-import { lanzouDelete } from './api/admin/lanzouDelete';
-import { lanzouDetail } from './api/admin/lanzouDetail';
-import { getLanzouSettings, updateLanzouSettings } from './api/admin/lanzouSettings';
-import { lanzouUploadUrl } from './api/admin/lanzouUploadUrl';
+
 import { ensureSchema } from './utils/dbMigration';
 
 const app = new Hono<{ Bindings: Bindings }>();
@@ -395,13 +390,7 @@ app.post('/admin/r2/upload', r2Upload);
 app.delete('/admin/r2/delete', r2Delete);
 app.get('/admin/r2/get', r2Get);
 
-app.get('/admin/lanzou/list', lanzouList);
-app.post('/admin/lanzou/upload', lanzouUpload);
-app.delete('/admin/lanzou/delete', lanzouDelete);
-app.get('/admin/lanzou/detail', lanzouDetail);
-app.get('/admin/lanzou/settings', getLanzouSettings);
-app.put('/admin/lanzou/settings', updateLanzouSettings);
-app.post('/admin/lanzou/upload-url', lanzouUploadUrl);
+
 
 app.get('/admin/settings/admin-display', async (c) => {
 	try {

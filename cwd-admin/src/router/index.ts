@@ -7,7 +7,6 @@ import DataView from '../views/DataView/index.vue';
 import StatsView from '../views/StatsView/index.vue';
 import AnalyticsVisitView from '../views/AnalyticsVisitView/index.vue';
 import UsersView from '../views/UsersView/index.vue';
-import LanzouView from '../views/LanzouView/index.vue';
 
 
 const routes: RouteRecordRaw[] = [
@@ -72,14 +71,7 @@ const routes: RouteRecordRaw[] = [
 			title: '用户管理',
 		},
 	},
-	{
-		path: 'lanzou',
-		name: 'lanzou',
-		component: LanzouView,
-		meta: {
-			title: '蓝奏云',
-		},
-	},
+
 ],
 	},
 ];

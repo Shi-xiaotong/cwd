@@ -109,19 +109,7 @@
               </li>
             </ul>
           </li>
-          <li class="menu-section">
-            <div class="menu-section-label">{{ t("menu.section.storage") }}</div>
-            <ul class="menu">
-              <li
-                class="menu-item"
-                :class="{ active: isRouteActive('lanzou') }"
-                @click="goLanzou"
-              >
-                <PhCloudArrowUp class="menu-item-icon" :size="18" />
-                <span>{{ t("menu.lanzou") }}</span>
-              </li>
-            </ul>
-          </li>
+
           <li class="menu-section">
             <div class="menu-section-label">{{ t("menu.section.system") }}</div>
             <ul class="menu">
@@ -383,10 +371,7 @@ function goUsers() {
   closeSider();
 }
 
-function goLanzou() {
-  router.push({ name: "lanzou" });
-  closeSider();
-}
+
 
 function openDocs() {
   window.open("https://cwd.js.org", "_blank");
