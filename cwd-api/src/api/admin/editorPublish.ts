@@ -1,5 +1,6 @@
 import { Context } from 'hono';
 import { Bindings } from '../../bindings';
+import { loadCredentials } from '../../utils/publishCredentials';
 
 interface PublishRequest {
   title: string;
@@ -29,11 +30,13 @@ export async function editorPublish(c: Context<{ Bindings: Bindings }>) {
       return c.json({ message: '缺少必填字段: title, slug, category, content' }, 400);
     }
 
-    const githubToken = c.env.GITHUB_TOKEN;
-    const blogRepo = c.env.BLOG_REPO || 'Shi-xiaotong/my-blog';
+    // 从 D1 读取凭证
+    const credentials = await loadCredentials(c.env);
+    const githubToken = credentials.github_token;
+    const blogRepo = credentials.github_repo || 'Shi-xiaotong/my-blog';
 
     if (!githubToken) {
-      return c.json({ message: 'GITHUB_TOKEN 未配置' }, 500);
+      return c.json({ message: '请先在设置中配置 GitHub Token' }, 400);
     }
 
     // 1. Build Hexo markdown file
@@ -145,11 +148,12 @@ async function wxCreateDraft(
     imageUrls: string[];
   }
 ): Promise<any> {
-  const appId = c.env.WECHAT_APP_ID;
-  const appSecret = c.env.WECHAT_APP_SECRET;
+  const credentials = await loadCredentials(c.env);
+  const appId = credentials.wx_appid;
+  const appSecret = credentials.wx_appsecret;
 
   if (!appId || !appSecret) {
-    return { success: false, error: '微信凭据未配置' };
+    return { success: false, error: '请先在设置中配置微信公众号凭据' };
   }
 
   // Get access token

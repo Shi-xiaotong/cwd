@@ -146,6 +146,9 @@
         <span v-if="publishStatus" :class="['status', publishStatus.type]">
           {{ publishStatus.message }}
         </span>
+        <button class="btn-secondary" @click="saveDraft" :disabled="publishing">
+          💾 保存草稿
+        </button>
         <button class="btn-secondary" @click="handleDryRun" :disabled="publishing">
           预览 HTML
         </button>
@@ -158,7 +161,7 @@
 </template>
 
 <script setup lang="ts">
-import { ref, computed, watch, nextTick } from 'vue';
+import { ref, computed, watch, nextTick, onMounted } from 'vue';
 import { uploadR2File, deleteR2File, editorPublish, uploadWechatImage, uploadWechatThumb } from '../../api/admin';
 
 const categories = ref(['tech', 'history', 'anime', 'science', 'games', 'recommendations', 'life']);
@@ -215,6 +218,67 @@ const isDragging = ref(false);
 const publishStatus = ref<{ type: string; message: string } | null>(null);
 const textareaRef = ref<HTMLTextAreaElement | null>(null);
 const previewRef = ref<HTMLDivElement | null>(null);
+
+// --- Draft management ---
+const DRAFT_KEY = 'cwd_editor_draft';
+const draftSavedAt = ref<string>('');
+
+function saveDraft() {
+  const draft = {
+    ...form.value,
+    uploadedImages: uploadedImages.value,
+    savedAt: new Date().toISOString(),
+  };
+  localStorage.setItem(DRAFT_KEY, JSON.stringify(draft));
+  draftSavedAt.value = new Date().toLocaleTimeString();
+  publishStatus.value = { type: 'success', message: `草稿已保存 ${draftSavedAt.value}` };
+}
+
+function loadDraft() {
+  try {
+    const raw = localStorage.getItem(DRAFT_KEY);
+    if (!raw) return false;
+    const draft = JSON.parse(raw);
+    if (!draft.content && !draft.title) return false;
+    form.value.title = draft.title || '';
+    form.value.slug = draft.slug || '';
+    form.value.category = draft.category || 'tech';
+    form.value.content = draft.content || '';
+    form.value.digest = draft.digest || '';
+    form.value.createWechatDraft = draft.createWechatDraft || false;
+    if (draft.uploadedImages) uploadedImages.value = draft.uploadedImages;
+    draftSavedAt.value = draft.savedAt ? new Date(draft.savedAt).toLocaleTimeString() : '';
+    return true;
+  } catch { return false; }
+}
+
+function clearDraft() {
+  localStorage.removeItem(DRAFT_KEY);
+  draftSavedAt.value = '';
+}
+
+// Auto-save with 5s debounce
+let draftTimer: ReturnType<typeof setTimeout> | null = null;
+watch(() => form.value.content, () => {
+  if (draftTimer) clearTimeout(draftTimer);
+  draftTimer = setTimeout(() => {
+    if (form.value.content.trim().length > 50) saveDraft();
+  }, 5000);
+});
+
+// Restore draft on mount
+onMounted(() => {
+  const restored = loadDraft();
+  if (restored) {
+    publishStatus.value = { type: 'info', message: `已恢复草稿（${draftSavedAt.value}）` };
+    setTimeout(() => { publishStatus.value = null; }, 3000);
+  }
+});
+
+// Clear draft after successful publish
+function handlePublishSuccess() {
+  clearDraft();
+}
 
 // Computed
 const titleBytes = computed(() => new TextEncoder().encode(form.value.title).length);
@@ -566,6 +630,7 @@ async function handlePublish() {
     if (result.wechat?.success) {
       publishStatus.value.message += ` | 公众号草稿已创建`;
     }
+    clearDraft();
   } catch (e: any) {
     publishStatus.value = { type: 'error', message: `❌ ${e.message}` };
   } finally {

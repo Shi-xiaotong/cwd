@@ -8,6 +8,7 @@ import StatsView from '../views/StatsView/index.vue';
 import AnalyticsVisitView from '../views/AnalyticsVisitView/index.vue';
 import UsersView from '../views/UsersView/index.vue';
 import EditorView from '../views/EditorView/index.vue';
+import CredentialsView from '../views/CredentialsView/index.vue';
 
 
 const routes: RouteRecordRaw[] = [
@@ -78,6 +79,14 @@ const routes: RouteRecordRaw[] = [
 		component: EditorView,
 		meta: {
 			title: '写文章',
+		},
+	},
+	{
+		path: 'credentials',
+		name: 'credentials',
+		component: CredentialsView,
+		meta: {
+			title: '发布凭证',
 		},
 	},
 

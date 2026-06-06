@@ -45,6 +45,7 @@ import { r2Delete } from './api/admin/r2Delete';
 import { r2Get } from './api/admin/r2Get';
 
 import { editorPublish } from './api/admin/editorPublish';
+import { getCredentials, updateCredentials } from './api/admin/credentials';
 
 import { ensureSchema } from './utils/dbMigration';
 
@@ -394,6 +395,10 @@ app.get('/admin/r2/get', r2Get);
 
 // Editor
 app.post('/admin/editor/publish', editorPublish);
+
+// Credentials management
+app.get('/admin/credentials', getCredentials);
+app.post('/admin/credentials', updateCredentials);
 
 
 app.get('/admin/settings/admin-display', async (c) => {

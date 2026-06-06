@@ -561,3 +561,23 @@ export async function uploadWechatThumb(imageUrl: string): Promise<string> {
 	// Placeholder — actual WeChat upload happens in Worker during publish
 	return '';
 }
+
+// --- Credentials Management ---
+
+export function getCredentials(): Promise<{
+	github_token: string;
+	github_repo: string;
+	wx_appid: string;
+	wx_appsecret: string;
+}> {
+	return get('/admin/credentials');
+}
+
+export function updateCredentials(data: {
+	github_token?: string;
+	github_repo?: string;
+	wx_appid?: string;
+	wx_appsecret?: string;
+}): Promise<{ success: boolean }> {
+	return post('/admin/credentials', data);
+}

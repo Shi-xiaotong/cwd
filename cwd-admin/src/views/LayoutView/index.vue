@@ -154,6 +154,14 @@
                 <PhUsers class="menu-item-icon" :size="18" />
                 <span>用户管理</span>
               </li>
+              <li
+                class="menu-item"
+                :class="{ active: isRouteActive('credentials') }"
+                @click="goCredentials"
+              >
+                <PhKey class="menu-item-icon" :size="18" />
+                <span>发布凭证</span>
+              </li>
             </ul>
           </li>
         </ul>
@@ -390,6 +398,11 @@ function goUsers() {
 
 function goEditor() {
   router.push({ name: "editor" });
+  closeSider();
+}
+
+function goCredentials() {
+  router.push({ name: "credentials" });
   closeSider();
 }
 
