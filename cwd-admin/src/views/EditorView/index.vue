@@ -57,15 +57,15 @@
               <button class="btn-sm" @click="insertHeading3" title="三级标题">H3</button>
               <span class="toolbar-divider"></span>
               <button class="btn-sm" @click="insertQuote" title="引用块">❝</button>
-              <button class="btn-sm" @click="insertUl" title="无序列表">• 列表</button>
-              <button class="btn-sm" @click="insertOl" title="有序列表">1. 列表</button>
-              <button class="btn-sm" @click="insertTable" title="插入表格">📊</button>
+              <button class="btn-sm" @click="insertUl" title="无序列表">•</button>
+              <button class="btn-sm" @click="insertOl" title="有序列表">1.</button>
+              <button class="btn-sm" @click="insertTable" title="插入表格">⊞</button>
               <button class="btn-sm" @click="insertHr" title="分割线">—</button>
-              <button class="btn-sm" @click="insertCodeBlock" title="代码块">```</button>
+              <button class="btn-sm" @click="insertCodeBlock" title="代码块">{ }</button>
               <span class="toolbar-divider"></span>
-              <button class="btn-sm btn-upload" @click="triggerFileUpload" title="上传图片（也可拖拽到编辑区）">🖼 上传图片</button>
+              <button class="btn-sm" @click="triggerFileUpload" title="上传图片">🖼</button>
               <input ref="fileInputRef" type="file" accept="image/*" multiple style="display:none" @change="handleFileSelect" />
-              <button class="btn-sm" @click="insertImagePlaceholder" title="插入图片占位符">📷 占位符</button>
+              <button class="btn-sm" @click="insertImagePlaceholder" title="插入图片占位符">📷</button>
           </div>
         </div>
         <div
@@ -671,7 +671,20 @@ async function handlePublish() {
 
 .pane-actions {
   display: flex;
-  gap: 4px;
+  flex-wrap: wrap;
+  gap: 3px;
+}
+
+/* 工具栏按钮 - 统一方形 */
+.pane-actions .btn-sm {
+  width: 32px;
+  height: 28px;
+  padding: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  line-height: 1;
 }
 
 .btn-sm {
