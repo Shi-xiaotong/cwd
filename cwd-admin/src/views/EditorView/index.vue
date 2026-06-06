@@ -87,6 +87,23 @@
       </div>
     </div>
 
+    <!-- Reading stats & quality check -->
+    <div class="editor-stats" v-if="form.content">
+      <div class="stats-row">
+        <span class="stat">📝 {{ wordCount }} 字</span>
+        <span class="stat">⏱ {{ readingTime }} 分钟阅读</span>
+        <span class="stat">📸 {{ imageCount }} 张图</span>
+        <span class="stat">📋 {{ paragraphCount }} 段</span>
+      </div>
+      <div class="quality-checks">
+        <span v-for="check in qualityChecks" :key="check.label"
+          :class="['check', check.ok ? 'pass' : 'warn']"
+          :title="check.tip">
+          {{ check.ok ? '✅' : '⚠️' }} {{ check.label }}
+        </span>
+      </div>
+    </div>
+
     <!-- Bottom bar: actions -->
     <div class="editor-actions">
       <div class="actions-left">
@@ -134,6 +151,95 @@ const previewRef = ref<HTMLDivElement | null>(null);
 
 // Computed
 const titleBytes = computed(() => new TextEncoder().encode(form.value.title).length);
+
+// Reading stats
+const wordCount = computed(() => {
+  const text = form.value.content.replace(/[#*\-`>\[\]()!]/g, '').replace(/\s+/g, '');
+  return text.length;
+});
+
+const readingTime = computed(() => {
+  // WeChat average: 300-400 chars/min for technical content
+  return Math.max(1, Math.ceil(wordCount.value / 350));
+});
+
+const imageCount = computed(() => {
+  return (form.value.content.match(/!\[img\]/g) || []).length;
+});
+
+const paragraphCount = computed(() => {
+  return form.value.content.split(/\n\n+/).filter(p => p.trim() && !p.trim().startsWith('```')).length;
+});
+
+// Quality checks — things that make readers stay or leave
+const qualityChecks = computed(() => {
+  const content = form.value.content;
+  const checks = [];
+
+  // 1. 标题吸引力
+  const title = form.value.title;
+  const hasNumber = /\d/.test(title);
+  const hasKeyword = /AI|工具|效率|免费|教程|实测|亲测|推荐|攻略|技巧/.test(title);
+  checks.push({
+    label: '标题有吸引力',
+    ok: title.length >= 8 && (hasNumber || hasKeyword),
+    tip: '好标题 = 数字 + 关键词 + 读者收益，如"亲测5个免费AI工具"',
+  });
+
+  // 2. 开头抓人（前100字有没有痛点/悬念/数字）
+  const firstPara = content.split('\n\n').find(p => p.trim() && !p.startsWith('#') && !p.startsWith('!')) || '';
+  const openingHook = /[？!！\d]|痛点|头疼|浪费|终于|其实|你知道/.test(firstPara);
+  checks.push({
+    label: '开头有钩子',
+    ok: openingHook,
+    tip: '前3行决定读者走不走。用问句、数字、痛点开头',
+  });
+
+  // 3. 段落长度（手机上超过3行就难读）
+  const paragraphs = content.split('\n\n').filter(p => p.trim() && !p.startsWith('#') && !p.startsWith('!') && !p.startsWith('```') && !p.startsWith('>'));
+  const longParas = paragraphs.filter(p => p.replace(/\s/g, '').length > 120);
+  checks.push({
+    label: '段落简短',
+    ok: longParas.length <= Math.floor(paragraphs.length * 0.3),
+    tip: '手机上超过3行的段落会让读者失去耐心。每段控制在100字以内',
+  });
+
+  // 4. 配图充足（视觉休息）
+  const imgs = (content.match(/!\[img\]/g) || []).length;
+  const contentLen = wordCount.value;
+  const imgRatio = contentLen > 0 ? imgs / (contentLen / 500) : 0;
+  checks.push({
+    label: '配图充足',
+    ok: imgs >= 3 && imgRatio >= 0.5,
+    tip: '每500字至少1张图。图片是读者的"视觉休息站"',
+  });
+
+  // 5. 有列表/表格（扫读友好）
+  const hasList = /^[-*]\s|^\d+\.\s|^\|/m.test(content);
+  checks.push({
+    label: '有列表/表格',
+    ok: hasList,
+    tip: '列表和表格让读者一眼获取信息，比大段文字有效10倍',
+  });
+
+  // 6. 结尾有CTA
+  const lastPara = content.split('\n\n').filter(p => p.trim()).pop() || '';
+  const hasCTA = /关注|在看|转发|收藏|点赞|评论|留言/.test(lastPara);
+  checks.push({
+    label: '结尾有引导',
+    ok: hasCTA,
+    tip: '结尾引导关注/在看/转发，是涨粉的关键一步',
+  });
+
+  // 7. 文章长度适中（公众号最佳800-2000字）
+  checks.push({
+    label: '长度适中',
+    ok: contentLen >= 600 && contentLen <= 3000,
+    tip: '公众号最佳阅读长度800-2000字。太短没价值，太长读不完',
+  });
+
+  return checks;
+});
 
 const canPublish = computed(() => {
   return form.value.title && form.value.slug && form.value.category && form.value.content;
@@ -486,6 +592,50 @@ async function handlePublish() {
 .image-count {
   font-weight: 400;
   color: var(--text-secondary, #999);
+}
+
+.editor-stats {
+  padding: 8px 16px;
+  border-top: 1px solid var(--border-color, #e0e0e0);
+  background: var(--bg-secondary, #fafafa);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.stats-row {
+  display: flex;
+  gap: 16px;
+  font-size: 12px;
+  color: var(--text-secondary, #888);
+}
+
+.stat {
+  white-space: nowrap;
+}
+
+.quality-checks {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.check {
+  font-size: 11px;
+  padding: 2px 8px;
+  border-radius: 10px;
+  cursor: help;
+  white-space: nowrap;
+}
+
+.check.pass {
+  background: #e8f5e9;
+  color: #2e7d32;
+}
+
+.check.warn {
+  background: #fff3e0;
+  color: #e65100;
 }
 
 .editor-images {

@@ -193,63 +193,93 @@ async function wxCreateDraft(
 }
 
 /**
- * Basic Markdown → WeChat HTML converter (inline styles)
+ * Markdown → WeChat HTML converter
+ * Optimized for mobile reading (100% WeChat readers are on phones)
+ *
+ * Design principles:
+ * - Short paragraphs (≤3 sentences) — mobile readers scroll fast
+ * - Generous spacing — breathing room between elements
+ * - Bold key takeaways — readers skim, bold the value
+ * - Lists over paragraphs — scannable beats readable
+ * - Images as visual rests — every 300-500 words
+ * - No walls of text — if it looks dense, readers leave
  */
 function mdToWxHtml(md: string, imageUrls: string[]): string {
   const primary = '#1a73e8';
-  const sectionStyle = `margin:0;padding:0 8px;max-width:100%;box-sizing:border-box;font-size:15px;line-height:1.8;color:#333;word-break:break-all;`;
+  const text = '#333';
+  const secondary = '#666';
+  const bg = '#f8f9fa';
+  const accent = '#e8f0fe';
+
+  const sectionStyle = `margin:0;padding:16px 12px;max-width:100%;box-sizing:border-box;font-size:15px;line-height:1.9;color:${text};word-break:break-all;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;`;
   const imgStyle = `margin:0;padding:0;display:block;width:100%;border-radius:8px;`;
 
   let html = md;
 
-  // Replace image placeholders
+  // Replace image placeholders with WeChat CDN URLs
   imageUrls.forEach((url, i) => {
     html = html.replace(new RegExp(`!\\[img\\]\\(IMG_${i + 1}\\)`, 'g'),
-      `<p style="margin:0 0 15px;padding:0;text-align:center;"><img data-ratio="0.5625" data-w="1080" src="${url}" style="${imgStyle}" /></p>`);
+      `%%IMG%%${url}%%/IMG%%`);
   });
 
   // Remaining markdown images
-  html = html.replace(/!\[img\]\(([^)]+)\)/g,
-    `<p style="margin:0 0 15px;padding:0;text-align:center;"><img data-ratio="0.5625" data-w="1080" src="$1" style="${imgStyle}" /></p>`);
+  html = html.replace(/!\[img\]\(([^)]+)\)/g, '%%IMG%%$1%%/IMG%%');
 
-  // Headers
+  // Headers — clear hierarchy, mobile-friendly sizes
   html = html.replace(/^### (.+)$/gm,
-    `<h3 style="margin:15px 0 10px;padding:0;font-size:16px;font-weight:bold;color:#333;">$1</h3>`);
+    `<h3 style="margin:24px 0 10px;padding:0;font-size:16px;font-weight:bold;color:${text};line-height:1.4;">$1</h3>`);
   html = html.replace(/^## (.+)$/gm,
-    `<h2 style="margin:20px 0 12px;padding:0;font-size:18px;font-weight:bold;color:${primary};">$1</h2>`);
+    `<h2 style="margin:28px 0 12px;padding:0;font-size:18px;font-weight:bold;color:${primary};line-height:1.4;">$1</h2>`);
   html = html.replace(/^# (.+)$/gm,
-    `<h1 style="margin:25px 0 15px;padding:0;font-size:22px;font-weight:bold;color:${primary};text-align:center;">$1</h1>`);
+    `<h1 style="margin:32px 0 16px;padding:0;font-size:22px;font-weight:bold;color:${primary};text-align:center;line-height:1.3;">$1</h1>`);
 
-  // Bold
+  // Bold — the #1 tool for skimmers
   html = html.replace(/\*\*(.+?)\*\*/g,
-    `<strong style="font-weight:bold;">$1</strong>`);
+    `<strong style="font-weight:bold;color:${text};">$1</strong>`);
 
-  // Blockquotes
+  // Inline code
+  html = html.replace(/`([^`]+)`/g,
+    `<code style="margin:0 2px;padding:2px 6px;background:${bg};border-radius:4px;font-size:13px;color:#d63384;font-family:Menlo,Monaco,Consolas,monospace;">$1</code>`);
+
+  // Blockquotes — tips, highlights, important notes
   html = html.replace(/^> (.+)$/gm,
-    `<blockquote style="margin:0 0 15px;padding:12px 16px;background:#f0f7ff;border-left:4px solid ${primary};border-radius:0 8px 8px 0;">$1</blockquote>`);
+    `<blockquote style="margin:16px 0;padding:14px 16px;background:${accent};border-left:4px solid ${primary};border-radius:0 8px 8px 0;font-size:14px;color:${secondary};line-height:1.7;">$1</blockquote>`);
 
-  // HR
+  // HR — section dividers
   html = html.replace(/^---$/gm,
-    `<hr style="margin:20px 0;padding:0;border:none;border-top:1px solid #e0e0e0;" />`);
+    `<hr style="margin:28px 0;padding:0;border:none;border-top:1px solid #e8e8e8;" />`);
 
   // Unordered list items
   html = html.replace(/^- (.+)$/gm,
-    `<li style="margin:0;padding:0;line-height:1.8;">$1</li>`);
+    `<li style="margin:0;padding:0;line-height:1.8;font-size:15px;">$1</li>`);
+
+  // Ordered list items
+  html = html.replace(/^\d+\. (.+)$/gm,
+    `<li style="margin:0;padding:0;line-height:1.8;font-size:15px;">$1</li>`);
 
   // Wrap consecutive <li> in <ul>
   html = html.replace(/((?:<li[^>]*>.*?<\/li>\n?)+)/g,
-    `<ul style="margin:10px 0 15px;padding-left:20px;">$1</ul>`);
+    `<ul style="margin:12px 0 16px;padding-left:20px;">$1</ul>`);
 
-  // Paragraphs (lines that aren't already HTML)
+  // Images — with proper spacing and data attributes for WeChat
+  html = html.replace(/%%IMG%%([^%]+)%%\/IMG%%/g,
+    `<p style="margin:16px 0;padding:0;text-align:center;"><img data-ratio="0.5625" data-w="1080" src="$1" style="${imgStyle}" /></p>`);
+
+  // Paragraphs — the core of mobile reading
   html = html.split('\n').map(line => {
     const trimmed = line.trim();
     if (!trimmed) return '';
     if (trimmed.startsWith('<')) return line;
-    return `<p style="margin:0 0 15px;padding:0;">${trimmed}</p>`;
+    // Don't wrap image placeholders
+    if (trimmed.startsWith('%%IMG%%')) return line;
+    return `<p style="margin:0 0 14px;padding:0;font-size:15px;line-height:1.9;color:${text};">${trimmed}</p>`;
   }).join('\n');
 
-  // Clean up empty lines
+  // Clean up excessive whitespace
   html = html.replace(/\n{3,}/g, '\n\n');
+
+  // Remove empty paragraphs
+  html = html.replace(/<p[^>]*>\s*<\/p>/g, '');
 
   return `<section style="${sectionStyle}">\n${html}\n</section>`;
 }
