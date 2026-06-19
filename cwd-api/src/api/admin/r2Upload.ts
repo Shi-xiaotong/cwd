@@ -25,9 +25,13 @@ export async function r2Upload(c: Context<{ Bindings: Bindings }>) {
 		}
 
 		const basePrefix = prefix.replace(/\/$/, '');
-		// Auto-prepend original/ if not already in a subfolder
-		const dirPrefix = basePrefix && !basePrefix.endsWith('/') ? `${basePrefix}/` : basePrefix;
-		const originalKey = dirPrefix ? `${dirPrefix}original/${file.name}` : `original/${file.name}`;
+		const bucketName = bucketParam || 'wallpaper';
+		// For myblog bucket: store directly in prefix (no original/ subfolder)
+		// For wallpaper bucket: keep original/ subfolder for compatibility
+		const dirPrefix = basePrefix ? `${basePrefix}/` : '';
+		const originalKey = (bucketName === 'myblog')
+			? `${dirPrefix}${file.name}`
+			: `${dirPrefix}original/${file.name}`;
 
 		// Upload original
 		const arrayBuffer = await file.arrayBuffer();
@@ -53,7 +57,6 @@ export async function r2Upload(c: Context<{ Bindings: Bindings }>) {
 
 		// Build URLs using custom domain for myblog bucket
 		const myblogDomain = 'https://img.233002.xyz';
-		const bucketName = bucketParam || 'wallpaper';
 		const isMyblog = bucketName === 'myblog';
 
 		const originalUrl = isMyblog

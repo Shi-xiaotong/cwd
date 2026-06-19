@@ -11,6 +11,11 @@ export type Bindings = {
   LANZOU_COOKIE?: string
   LANZOU_UID?: string
   DEFAULT_FOLDER_ID?: string
+  BAIDU_PUSH_SITE?: string
+  BAIDU_PUSH_TOKEN?: string
+  CF_API_TOKEN?: string
+  CF_ACCOUNT_ID?: string
+  CF_PAGES_PROJECT?: string
   GITHUB_TOKEN?: string
   BLOG_REPO?: string
   WECHAT_APP_ID?: string

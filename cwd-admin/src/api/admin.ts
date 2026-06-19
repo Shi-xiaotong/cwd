@@ -581,3 +581,174 @@ export function updateCredentials(data: {
 }): Promise<{ success: boolean }> {
 	return post('/admin/credentials', data);
 }
+
+// ===== Dashboard =====
+
+export type DashboardResponse = {
+	articleCount: number;
+	commentCount: number;
+	todayPv: number;
+	monthPv: number;
+	trend: { date: string; pv: number }[];
+	recentComments: CommentItem[];
+};
+
+export function getDashboard(): Promise<DashboardResponse> {
+	return get<DashboardResponse>('/admin/dashboard');
+}
+
+// ===== Articles =====
+
+export type ArticleItem = {
+	path: string;
+	title: string;
+	date: string;
+	category: string;
+	tags: string[];
+	status: string;
+	sha: string;
+};
+
+export type ArticleListResponse = {
+	items: ArticleItem[];
+	total: number;
+	page: number;
+	pageSize: number;
+};
+
+export function getArticles(page?: number, search?: string, category?: string): Promise<ArticleListResponse> {
+	const params = new URLSearchParams();
+	if (page) params.set('page', String(page));
+	if (search) params.set('search', search);
+	if (category) params.set('category', category);
+	const query = params.toString();
+	return get<ArticleListResponse>(query ? `/admin/articles?${query}` : '/admin/articles');
+}
+
+export function deleteArticle(path: string): Promise<{ message: string }> {
+	return del<{ message: string }>(`/admin/articles/${encodeURIComponent(path)}`);
+}
+
+// ===== Tags =====
+
+export type TagItem = {
+	name: string;
+	count: number;
+};
+
+export type TagListResponse = {
+	items: TagItem[];
+	total: number;
+};
+
+export function getTags(): Promise<TagListResponse> {
+	return get<TagListResponse>('/admin/tags');
+}
+
+export function renameTag(oldName: string, newName: string): Promise<{ message: string }> {
+	return put<{ message: string }>('/admin/tags/rename', { oldName, newName });
+}
+
+export function mergeTags(source: string, target: string): Promise<{ message: string }> {
+	return post<{ message: string }>('/admin/tags/merge', { source, target });
+}
+
+export function deleteTag(name: string): Promise<{ message: string }> {
+	return del<{ message: string }>(`/admin/tags/${encodeURIComponent(name)}`);
+}
+
+// ===== Categories =====
+
+export type CategoryItem = {
+	name: string;
+	count: number;
+};
+
+export type CategoryListResponse = {
+	items: CategoryItem[];
+	total: number;
+};
+
+export function getCategories(): Promise<CategoryListResponse> {
+	return get<CategoryListResponse>('/admin/categories');
+}
+
+export function renameCategory(oldName: string, newName: string): Promise<{ message: string }> {
+	return put<{ message: string }>('/admin/categories/rename', { oldName, newName });
+}
+
+export function deleteCategory(name: string): Promise<{ message: string }> {
+	return del<{ message: string }>(`/admin/categories/${encodeURIComponent(name)}`);
+}
+
+// ===== Daily News =====
+
+export type DailyNewsItem = {
+	title: string;
+	date: string;
+	coverUrl: string;
+	path: string;
+	status: string;
+};
+
+export type DailyNewsListResponse = {
+	items: DailyNewsItem[];
+	total: number;
+};
+
+export function getDailyNews(): Promise<DailyNewsListResponse> {
+	return get<DailyNewsListResponse>('/admin/daily-news');
+}
+
+export function regenerateDailyNews(): Promise<{ message: string }> {
+	return post<{ message: string }>('/admin/daily-news/regenerate');
+}
+
+// ===== SEO =====
+
+export type BaiduPushResponse = {
+	success: number;
+	fail: number;
+	errors: string[];
+};
+
+export function baiduPush(urls: string[]): Promise<BaiduPushResponse> {
+	return post<BaiduPushResponse>('/admin/seo/baidu-push', { urls });
+}
+
+export type SeoHistoryItem = {
+	date: string;
+	urlCount: number;
+	successCount: number;
+	failCount: number;
+};
+
+export type SeoHistoryResponse = {
+	items: SeoHistoryItem[];
+};
+
+export function getSeoHistory(): Promise<SeoHistoryResponse> {
+	return get<SeoHistoryResponse>('/admin/seo/history');
+}
+
+// ===== Deployments =====
+
+export type DeploymentItem = {
+	id: string;
+	url: string;
+	status: string;
+	date: string;
+	environment: string;
+};
+
+export type DeploymentListResponse = {
+	items: DeploymentItem[];
+};
+
+export function getDeployments(): Promise<DeploymentListResponse> {
+	return get<DeploymentListResponse>('/admin/deployments');
+}
+
+export function triggerDeploy(): Promise<{ message: string }> {
+	return post<{ message: string }>('/admin/deploy/trigger');
+}

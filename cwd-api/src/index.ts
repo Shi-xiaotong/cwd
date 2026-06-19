@@ -47,6 +47,15 @@ import { r2Get } from './api/admin/r2Get';
 import { editorPublish } from './api/admin/editorPublish';
 import { getCredentials, updateCredentials } from './api/admin/credentials';
 
+// Blog admin - articles, tags, categories, daily news, SEO, deployments
+import { getDashboard } from './api/admin/dashboard';
+import { listArticles, getArticle, deleteArticle, updateArticleStatus } from './api/admin/articles';
+import { listTags, renameTag, mergeTags, deleteTag } from './api/admin/tags';
+import { listCategories, renameCategory } from './api/admin/categories';
+import { listDailyNews, regenerateDailyNews } from './api/admin/dailyNews';
+import { baiduPush, seoHistory } from './api/admin/seo';
+import { listDeployments, triggerDeploy } from './api/admin/deployments';
+
 import { ensureSchema } from './utils/dbMigration';
 
 const app = new Hono<{ Bindings: Bindings }>();
@@ -399,6 +408,37 @@ app.post('/admin/editor/publish', editorPublish);
 // Credentials management
 app.get('/admin/credentials', getCredentials);
 app.post('/admin/credentials', updateCredentials);
+
+// Blog admin - Dashboard
+app.get('/admin/dashboard', getDashboard);
+
+// Blog admin - Articles
+app.get('/admin/articles', listArticles);
+app.get('/admin/articles/*', getArticle);
+app.delete('/admin/articles/*', deleteArticle);
+app.put('/admin/articles/*/status', updateArticleStatus);
+
+// Blog admin - Tags
+app.get('/admin/tags', listTags);
+app.put('/admin/tags/rename', renameTag);
+app.post('/admin/tags/merge', mergeTags);
+app.delete('/admin/tags/:name', deleteTag);
+
+// Blog admin - Categories
+app.get('/admin/categories', listCategories);
+app.put('/admin/categories/rename', renameCategory);
+
+// Blog admin - Daily News
+app.get('/admin/daily-news', listDailyNews);
+app.post('/admin/daily-news/regenerate', regenerateDailyNews);
+
+// Blog admin - SEO
+app.post('/admin/seo/baidu-push', baiduPush);
+app.get('/admin/seo/history', seoHistory);
+
+// Blog admin - Deployments
+app.get('/admin/deployments', listDeployments);
+app.post('/admin/deploy/trigger', triggerDeploy);
 
 
 app.get('/admin/settings/admin-display', async (c) => {

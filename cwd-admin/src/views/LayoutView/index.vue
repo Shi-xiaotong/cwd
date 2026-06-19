@@ -80,25 +80,78 @@
           </select>
         </div>
         <ul class="menu">
+          <!-- 仪表盘 -->
           <li class="menu-section">
             <ul class="menu">
               <li
                 class="menu-item"
-                :class="{ active: isRouteActive('analytics') }"
-                @click="goAnalytics"
+                :class="{ active: isRouteActive('dashboard') }"
+                @click="goRoute('dashboard')"
               >
-                <PhChartBar class="menu-item-icon" :size="18" />
-                <span>{{ t("menu.analytics") }}</span>
+                <PhSquaresFour class="menu-item-icon" :size="18" />
+                <span>仪表盘</span>
               </li>
             </ul>
           </li>
+          <!-- 内容管理 -->
+          <li class="menu-section">
+            <div class="menu-section-label">内容管理</div>
+            <ul class="menu">
+              <li
+                class="menu-item"
+                :class="{ active: isRouteActive('editor') }"
+                @click="goRoute('editor')"
+              >
+                <PhPencilSimple class="menu-item-icon" :size="18" />
+                <span>写文章</span>
+              </li>
+              <li
+                class="menu-item"
+                :class="{ active: isRouteActive('articles') }"
+                @click="goRoute('articles')"
+              >
+                <PhArticle class="menu-item-icon" :size="18" />
+                <span>文章管理</span>
+              </li>
+              <li
+                class="menu-item"
+                :class="{ active: isRouteActive('tags') }"
+                @click="goRoute('tags')"
+              >
+                <PhTag class="menu-item-icon" :size="18" />
+                <span>标签管理</span>
+              </li>
+              <li
+                class="menu-item"
+                :class="{ active: isRouteActive('categories') }"
+                @click="goRoute('categories')"
+              >
+                <PhFolder class="menu-item-icon" :size="18" />
+                <span>分类管理</span>
+              </li>
+            </ul>
+          </li>
+          <!-- 每日热点 -->
+          <li class="menu-section">
+            <ul class="menu">
+              <li
+                class="menu-item"
+                :class="{ active: isRouteActive('daily-news') }"
+                @click="goRoute('daily-news')"
+              >
+                <PhNewspaper class="menu-item-icon" :size="18" />
+                <span>每日热点</span>
+              </li>
+            </ul>
+          </li>
+          <!-- 评论系统 -->
           <li class="menu-section">
             <div class="menu-section-label">{{ t("menu.section.comments") }}</div>
             <ul class="menu">
               <li
                 class="menu-item"
                 :class="{ active: isRouteActive('comments') }"
-                @click="goComments"
+                @click="goRoute('comments')"
               >
                 <PhChatCircleDots class="menu-item-icon" :size="18" />
                 <span>{{ t("menu.comments") }}</span>
@@ -106,50 +159,58 @@
               <li
                 class="menu-item"
                 :class="{ active: isRouteActive('stats') }"
-                @click="goStats"
+                @click="goRoute('stats')"
               >
-                <PhSquaresFour class="menu-item-icon" :size="18" />
+                <PhChartBar class="menu-item-icon" :size="18" />
                 <span>{{ t("menu.stats") }}</span>
               </li>
             </ul>
           </li>
-
+          <!-- 访问统计 -->
           <li class="menu-section">
-            <div class="menu-section-label">内容</div>
             <ul class="menu">
               <li
                 class="menu-item"
-                :class="{ active: isRouteActive('editor') }"
-                @click="goEditor"
+                :class="{ active: isRouteActive('analytics') }"
+                @click="goRoute('analytics')"
               >
-                <PhPencilSimple class="menu-item-icon" :size="18" />
-                <span>写文章</span>
+                <PhChartLineUp class="menu-item-icon" :size="18" />
+                <span>{{ t("menu.analytics") }}</span>
               </li>
             </ul>
           </li>
+          <!-- 系统设置 -->
           <li class="menu-section">
             <div class="menu-section-label">{{ t("menu.section.system") }}</div>
             <ul class="menu">
               <li
                 class="menu-item"
+                :class="{ active: isRouteActive('seo') }"
+                @click="goRoute('seo')"
+              >
+                <PhMagnifyingGlass class="menu-item-icon" :size="18" />
+                <span>SEO工具</span>
+              </li>
+              <li
+                class="menu-item"
+                :class="{ active: isRouteActive('deploy') }"
+                @click="goRoute('deploy')"
+              >
+                <PhRocket class="menu-item-icon" :size="18" />
+                <span>部署管理</span>
+              </li>
+              <li
+                class="menu-item"
                 :class="{ active: isRouteActive('data') }"
-                @click="goData"
+                @click="goRoute('data')"
               >
                 <PhDatabase class="menu-item-icon" :size="18" />
                 <span>{{ t("menu.data") }}</span>
               </li>
               <li
                 class="menu-item"
-                :class="{ active: isRouteActive('settings') }"
-                @click="goSettings"
-              >
-                <PhGear class="menu-item-icon" :size="18" />
-                <span>{{ t("menu.settings") }}</span>
-              </li>
-              <li
-                class="menu-item"
                 :class="{ active: isRouteActive('users') }"
-                @click="goUsers"
+                @click="goRoute('users')"
               >
                 <PhUsers class="menu-item-icon" :size="18" />
                 <span>用户管理</span>
@@ -157,10 +218,18 @@
               <li
                 class="menu-item"
                 :class="{ active: isRouteActive('credentials') }"
-                @click="goCredentials"
+                @click="goRoute('credentials')"
               >
                 <PhKey class="menu-item-icon" :size="18" />
                 <span>发布凭证</span>
+              </li>
+              <li
+                class="menu-item"
+                :class="{ active: isRouteActive('settings') }"
+                @click="goRoute('settings')"
+              >
+                <PhGear class="menu-item-icon" :size="18" />
+                <span>{{ t("menu.settings") }}</span>
               </li>
             </ul>
           </li>
@@ -366,46 +435,10 @@ function closeActions() {
   isActionsOpen.value = false;
 }
 
-function goComments() {
-  router.push({ name: "comments" });
+function goRoute(name: string) {
+  router.push({ name });
   closeSider();
 }
-
-function goStats() {
-  router.push({ name: "stats" });
-  closeSider();
-}
-
-function goAnalytics() {
-  router.push({ name: "analytics" });
-  closeSider();
-}
-
-function goData() {
-  router.push({ name: "data" });
-  closeSider();
-}
-
-function goSettings() {
-  router.push({ name: "settings" });
-  closeSider();
-}
-
-function goUsers() {
-  router.push({ name: "users" });
-  closeSider();
-}
-
-function goEditor() {
-  router.push({ name: "editor" });
-  closeSider();
-}
-
-function goCredentials() {
-  router.push({ name: "credentials" });
-  closeSider();
-}
-
 
 
 function openDocs() {

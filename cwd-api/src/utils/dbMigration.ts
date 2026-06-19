@@ -124,9 +124,12 @@ export async function ensureSchema(env: Bindings) {
         // Also ensure Comment index exists (just in case)
         await env.CWD_DB.prepare('CREATE INDEX IF NOT EXISTS idx_site_id ON Comment(site_id)').run();
 
+        // 5. Create seo_push_history table
+        await env.CWD_DB.prepare(
+        	'CREATE TABLE IF NOT EXISTS seo_push_history (id INTEGER PRIMARY KEY AUTOINCREMENT, urls TEXT NOT NULL, success_count INTEGER NOT NULL DEFAULT 0, fail_count INTEGER NOT NULL DEFAULT 0, created_at INTEGER NOT NULL)'
+        ).run();
 
-
-	} catch (e) {
+        } catch (e) {
 		console.error('Database migration failed:', e);
 		// Don't throw, to allow app to start, but log error. 
         // Or maybe we should throw? If schema is wrong, queries will fail anyway.

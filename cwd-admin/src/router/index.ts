@@ -9,6 +9,13 @@ import AnalyticsVisitView from '../views/AnalyticsVisitView/index.vue';
 import UsersView from '../views/UsersView/index.vue';
 import EditorView from '../views/EditorView/index.vue';
 import CredentialsView from '../views/CredentialsView/index.vue';
+import DashboardView from '../views/DashboardView/index.vue';
+import ArticlesView from '../views/ArticlesView/index.vue';
+import TagsView from '../views/TagsView/index.vue';
+import CategoriesView from '../views/CategoriesView/index.vue';
+import DailyNewsView from '../views/DailyNewsView/index.vue';
+import SeoView from '../views/SeoView/index.vue';
+import DeployView from '../views/DeployView/index.vue';
 
 
 const routes: RouteRecordRaw[] = [
@@ -23,8 +30,16 @@ const routes: RouteRecordRaw[] = [
 		children: [
 		{
 			path: '',
-			redirect: '/analytics',
+			redirect: '/dashboard',
 		},
+			{
+				path: 'dashboard',
+				name: 'dashboard',
+				component: DashboardView,
+				meta: {
+					title: '仪表盘',
+				},
+			},
 			{
 				path: 'comments',
 				name: 'comments',
@@ -89,8 +104,56 @@ const routes: RouteRecordRaw[] = [
 			title: '发布凭证',
 		},
 	},
+	{
+		path: 'articles',
+		name: 'articles',
+		component: ArticlesView,
+		meta: {
+			title: '文章管理',
+		},
+	},
+	{
+		path: 'tags',
+		name: 'tags',
+		component: TagsView,
+		meta: {
+			title: '标签管理',
+		},
+	},
+	{
+		path: 'categories',
+		name: 'categories',
+		component: CategoriesView,
+		meta: {
+			title: '分类管理',
+		},
+	},
+	{
+		path: 'daily-news',
+		name: 'daily-news',
+		component: DailyNewsView,
+		meta: {
+			title: '每日热点',
+		},
+	},
+	{
+		path: 'seo',
+		name: 'seo',
+		component: SeoView,
+		meta: {
+			title: 'SEO工具',
+		},
+	},
+	{
+		path: 'deploy',
+		name: 'deploy',
+		component: DeployView,
+		meta: {
+			title: '部署管理',
+		},
+	},
 
-],
+	],
 	},
 ];
 
