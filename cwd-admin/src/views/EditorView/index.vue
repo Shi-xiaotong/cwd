@@ -162,7 +162,10 @@
 
 <script setup lang="ts">
 import { ref, computed, watch, nextTick, onMounted } from 'vue';
-import { uploadR2File, deleteR2File, editorPublish, uploadWechatImage, uploadWechatThumb } from '../../api/admin';
+import { useRoute } from 'vue-router';
+import { uploadR2File, deleteR2File, editorPublish, uploadWechatImage, uploadWechatThumb, getArticle } from '../../api/admin';
+
+const route = useRoute();
 
 const categories = ref(['tech', 'history', 'anime', 'science', 'games', 'recommendations', 'life']);
 const showNewCategory = ref(false);
@@ -266,8 +269,28 @@ watch(() => form.value.content, () => {
   }, 5000);
 });
 
-// Restore draft on mount
-onMounted(() => {
+// Load article from URL param or restore draft on mount
+onMounted(async () => {
+  const editPath = route.query.path as string;
+  if (editPath) {
+    // Load existing article for editing
+    try {
+      publishStatus.value = { type: 'info', message: '正在加载文章...' };
+      const article = await getArticle(editPath);
+      const fm = article.frontMatter || {};
+      form.value.title = fm.title || '';
+      form.value.slug = editPath.split('/').pop()?.replace('.md', '') || '';
+      form.value.category = fm.categories?.[0] || fm.category || 'tech';
+      form.value.content = article.body || '';
+      form.value.digest = fm.digest || '';
+      publishStatus.value = { type: 'success', message: '文章已加载，开始编辑' };
+      setTimeout(() => { publishStatus.value = null; }, 3000);
+    } catch (e: any) {
+      publishStatus.value = { type: 'error', message: `加载失败: ${e.message}` };
+    }
+    return;
+  }
+  // Otherwise restore draft
   const restored = loadDraft();
   if (restored) {
     publishStatus.value = { type: 'info', message: `已恢复草稿（${draftSavedAt.value}）` };

@@ -625,6 +625,18 @@ export function getArticles(page?: number, search?: string, category?: string): 
 	return get<ArticleListResponse>(query ? `/admin/articles?${query}` : '/admin/articles');
 }
 
+export type ArticleContent = {
+	content: string;
+	body: string;
+	frontMatter: Record<string, any>;
+	sha: string;
+	path: string;
+};
+
+export function getArticle(path: string): Promise<ArticleContent> {
+	return get<ArticleContent>(`/admin/articles/${encodeURIComponent(path)}`);
+}
+
 export function deleteArticle(path: string): Promise<{ message: string }> {
 	return del<{ message: string }>(`/admin/articles/${encodeURIComponent(path)}`);
 }
