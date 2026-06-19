@@ -409,9 +409,9 @@ const previewHtml = computed(() => {
       `<img src="${img.url}" style="max-width:100%;border-radius:8px;margin:10px 0;" />`);
   });
 
-  // Remaining markdown images
-  md = md.replace(/!\[img\]\(([^)]+)\)/g,
-    `<img src="$1" style="max-width:100%;border-radius:8px;margin:10px 0;" />`);
+  // Remaining markdown images (match any alt text)
+  md = md.replace(/!\[([^\]]*)\]\(([^)]+)\)/g,
+    `<img src="$2" alt="$1" style="max-width:100%;border-radius:8px;margin:10px 0;" />`);
 
   // Headers
   md = md.replace(/^### (.+)$/gm, '<h3 style="margin:12px 0 8px;font-size:16px;font-weight:bold;">$1</h3>');
