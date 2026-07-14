@@ -1,0 +1,22 @@
+name = "cwd-api"
+main = "src/index.ts"
+compatibility_date = "2026-01-03"
+compatibility_flags = ["nodejs_compat"]
+workers_dev = true
+
+[[d1_databases]]
+binding = "CWD_DB"
+database_name = "CWD_DB"
+database_id = "f08bf70a-1daa-48c1-ba9a-6e13304156a5"
+
+[[kv_namespaces]]
+binding = "CWD_AUTH_KV"
+id = "bb2a651d550d4d97a35deddf4e0ff24a"
+
+[[r2_buckets]]
+binding = "WALLPAPER_BUCKET"
+bucket_name = "wallpaper"
+
+[[r2_buckets]]
+binding = "MYBLOG_BUCKET"
+bucket_name = "myblog"

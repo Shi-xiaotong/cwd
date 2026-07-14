@@ -20,10 +20,8 @@ jobs:
 
       - name: Install & Deploy
         working-directory: cwd-api
-        run: |
-          npm install
-          node scripts/index.js
-          ./node_modules/.bin/wrangler deploy --config wrangler.jsonc --compatibility-date 2026-01-03
+        run: npm run deploy
         env:
           CLOUDFLARE_API_TOKEN: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           CLOUDFLARE_ACCOUNT_ID: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
+          CI: true

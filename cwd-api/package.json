@@ -2,7 +2,7 @@
 	"name": "cwd-api",
 	"version": "0.1.13",
 	"scripts": {
-		"deploy": "node scripts/index.js && wrangler deploy",
+		"deploy": "node scripts/index.js && wrangler deploy --x-autoconfig false",
 		"dev": "wrangler dev",
 		"start": "wrangler dev",
 		"test": "vitest",
