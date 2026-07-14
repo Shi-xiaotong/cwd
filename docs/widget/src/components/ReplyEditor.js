@@ -3,6 +3,8 @@
  */
 
 import { Component } from './Component.js';
+import { EmotionPicker } from './EmotionPicker.js';
+import { insertTextAtCursor } from '../utils/emotions.js';
 import { renderMarkdown } from '../utils/markdown.js';
 
 export class ReplyEditor extends Component {
@@ -13,6 +15,7 @@ export class ReplyEditor extends Component {
 	 * @param {string} props.content - 回复内容
 	 * @param {string|null} props.error - 错误信息
 	 * @param {boolean} props.submitting - 是否正在提交
+	 * @param {Array} props.emotionGroups - 表情分组
 	 * @param {Function} props.onUpdate - 内容更新回调
 	 * @param {Function} props.onSubmit - 提交回调
 	 * @param {Function} props.onCancel - 取消回调
@@ -28,6 +31,7 @@ export class ReplyEditor extends Component {
 			showUserInfo: !currentUser || !currentUser.name || !currentUser.email,
 			showPreview: false,
 		};
+		this.emotionPicker = null;
 	}
 
 	render() {
@@ -81,6 +85,9 @@ export class ReplyEditor extends Component {
 						onInput: (e) => this.handleInput(e),
 						onKeydown: (e) => this.handleTextareaKeydown(e),
 					},
+				}),
+				this.createElement('div', {
+					className: 'cwd-emotion-picker-container cwd-reply-emotion-picker-container',
 				}),
 
 				// 错误提示
@@ -164,6 +171,28 @@ export class ReplyEditor extends Component {
 		this.elements.root = root;
 		this.empty(this.container);
 		this.container.appendChild(root);
+		this.renderEmotionPicker(root);
+	}
+
+	/**
+	 * 渲染回复框表情选择器。
+	 *
+	 * @param {HTMLElement} root - 回复编辑器根元素
+	 */
+	renderEmotionPicker(root) {
+		const groups = Array.isArray(this.props.emotionGroups) ? this.props.emotionGroups : [];
+		const pickerContainer = root.querySelector('.cwd-emotion-picker-container');
+		if (!pickerContainer || !groups.length) {
+			this.emotionPicker = null;
+			return;
+		}
+
+		this.emotionPicker = new EmotionPicker(pickerContainer, {
+			groups,
+			onSelect: (item) => this.handleEmotionSelect(item),
+			t: this.t,
+		});
+		this.emotionPicker.render();
 	}
 
 	updateProps(prevProps) {
@@ -226,6 +255,43 @@ export class ReplyEditor extends Component {
 		// 实时更新预览内容
 		if (this.state.showPreview) {
 			this.updatePreviewContent(this.state.content);
+		}
+	}
+
+	/**
+	 * 插入选中的表情。
+	 *
+	 * @param {Object} item - 表情项
+	 */
+	handleEmotionSelect(item) {
+		const textarea = this.elements.root?.querySelector('.cwd-reply-textarea');
+		if (!textarea) {
+			return;
+		}
+
+		this.state.content = insertTextAtCursor(textarea, item.insertValue);
+		if (this.props.onUpdate) {
+			this.props.onUpdate(this.state.content);
+		}
+		if (this.state.showPreview) {
+			this.updatePreviewContent(this.state.content);
+		}
+		this.updateActionState();
+		textarea.focus();
+	}
+
+	/**
+	 * 更新回复按钮状态。
+	 */
+	updateActionState() {
+		const submitBtn = this.elements.root?.querySelector('.cwd-btn-primary');
+		if (submitBtn) {
+			submitBtn.disabled = this.props.submitting || !this.state.content.trim();
+		}
+
+		const previewBtn = this.elements.root?.querySelector('.cwd-btn-preview');
+		if (previewBtn) {
+			previewBtn.disabled = this.props.submitting || !this.state.content.trim();
 		}
 	}
 

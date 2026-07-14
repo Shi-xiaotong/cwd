@@ -47,6 +47,9 @@ function copyUmdToCwdPlugin() {
 
 export default defineConfig({
 	plugins: [cssInjectedByJsPlugin(), copyDtsPlugin(), copyUmdToCwdPlugin()],
+	server: {
+		host: true,
+	},
 	resolve: {
 		alias: {
 			'@': resolve(__dirname, 'src'),

@@ -274,7 +274,9 @@
       "widgetLanguage": "组件语言",
       "widgetLanguageHint": "设置前端评论组件显示的语言。",
       "save": "保存",
-      "saving": "保存中..."
+      "saving": "保存中...",
+      "emotionJson": "表情 JSON",
+      "emotionJsonHint": "自定义前端表情面板的 OwO JSON。留空则不显示表情按钮；图片表情默认读取 /emotion/<表情包>/<文件名>.png。"
     },
     "emailNotify": {
       "title": "通知邮箱设置",

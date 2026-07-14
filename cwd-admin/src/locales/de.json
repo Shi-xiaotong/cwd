@@ -275,7 +275,9 @@
       "widgetLanguage": "Widget-Sprache",
       "widgetLanguageHint": "Sprache für das Frontend-Widget.",
       "save": "Speichern",
-      "saving": "Speichert..."
+      "saving": "Speichert...",
+      "emotionJson": "Emotion JSON",
+      "emotionJsonHint": "Custom OwO JSON for the frontend emotion picker. Leave empty to hide the emotion button; image packs default to /emotion/<pack>/<file>.png."
     },
     "emailNotify": {
       "title": "E-Mail-Benachrichtigung",

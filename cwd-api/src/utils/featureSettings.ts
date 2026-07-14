@@ -7,6 +7,7 @@ export const FEATURE_COMMENT_PLACEHOLDER_KEY = 'comment_feature_placeholder';
 export const FEATURE_VISIBLE_DOMAINS_KEY = 'admin_visible_domains';
 export const FEATURE_ADMIN_LANGUAGE_KEY = 'admin_language';
 export const FEATURE_WIDGET_LANGUAGE_KEY = 'widget_language';
+export const FEATURE_EMOTION_JSON_KEY = 'comment_feature_emotion_json';
 
 export type FeatureSettings = {
 	enableCommentLike: boolean;
@@ -16,7 +17,31 @@ export type FeatureSettings = {
 	visibleDomains?: string[];
 	adminLanguage?: string;
 	widgetLanguage?: string;
+	emotionJson?: string;
 };
+
+/**
+ * 校验并规整自定义表情 JSON 文件链接。
+ *
+ * @param value - 后台提交的 JSON 文件链接
+ * @returns 去除首尾空白后的 JSON 文件链接
+ */
+export function assertValidEmotionJsonUrl(value: string): string {
+	const trimmed = value.trim();
+	if (!trimmed) {
+		return '';
+	}
+
+	try {
+		const url = new URL(trimmed, 'https://cwd.local');
+		if (!['http:', 'https:'].includes(url.protocol) || !url.pathname.toLowerCase().endsWith('.json')) {
+			throw new Error('invalid url');
+		}
+		return trimmed;
+	} catch {
+		throw new Error('表情 JSON 链接格式不正确');
+	}
+}
 
 export async function loadFeatureSettings(env: Bindings): Promise<FeatureSettings> {
 	await env.CWD_DB.prepare(
@@ -30,10 +55,11 @@ export async function loadFeatureSettings(env: Bindings): Promise<FeatureSetting
 		FEATURE_COMMENT_PLACEHOLDER_KEY,
 		FEATURE_VISIBLE_DOMAINS_KEY,
 		FEATURE_ADMIN_LANGUAGE_KEY,
-		FEATURE_WIDGET_LANGUAGE_KEY
+		FEATURE_WIDGET_LANGUAGE_KEY,
+		FEATURE_EMOTION_JSON_KEY
 	];
 	const { results } = await env.CWD_DB.prepare(
-		'SELECT key, value FROM Settings WHERE key IN (?, ?, ?, ?, ?, ?, ?)'
+		'SELECT key, value FROM Settings WHERE key IN (?, ?, ?, ?, ?, ?, ?, ?)'
 	)
 		.bind(...keys)
 		.all<{ key: string; value: string }>();
@@ -71,6 +97,7 @@ export async function loadFeatureSettings(env: Bindings): Promise<FeatureSetting
 	const commentPlaceholder = map.get(FEATURE_COMMENT_PLACEHOLDER_KEY);
 	const adminLanguage = map.get(FEATURE_ADMIN_LANGUAGE_KEY);
 	const widgetLanguage = map.get(FEATURE_WIDGET_LANGUAGE_KEY);
+	const emotionJson = map.get(FEATURE_EMOTION_JSON_KEY) ?? '';
 
 	let visibleDomains: string[] | undefined;
 	const visibleDomainsRaw = map.get(FEATURE_VISIBLE_DOMAINS_KEY);
@@ -89,7 +116,8 @@ export async function loadFeatureSettings(env: Bindings): Promise<FeatureSetting
 		commentPlaceholder,
 		visibleDomains,
 		adminLanguage,
-		widgetLanguage
+		widgetLanguage,
+		emotionJson
 	};
 }
 
@@ -144,6 +172,10 @@ export async function saveFeatureSettings(
 		{
 			key: FEATURE_WIDGET_LANGUAGE_KEY,
 			value: settings.widgetLanguage
+		},
+		{
+			key: FEATURE_EMOTION_JSON_KEY,
+			value: settings.emotionJson !== undefined ? assertValidEmotionJsonUrl(settings.emotionJson) : undefined
 		}
 	];
 

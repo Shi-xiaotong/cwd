@@ -8,6 +8,7 @@ import { createCommentStore } from './store.js';
 import { CommentForm } from '@/components/CommentForm.js';
 import { CommentList } from '@/components/CommentList.js';
 import { ImagePreview } from '@/components/ImagePreview.js';
+import { loadEmotionGroups } from '@/utils/emotions.js';
 import styles from '@/styles/main.css?inline';
 import { locales } from '@/locales/index.js';
 
@@ -21,6 +22,7 @@ export class CWDComments {
 	 * @param {string} config.apiBaseUrl - API 基础地址
 	 * @param {'light'|'dark'} [config.theme] - 主题（可选）
 	 * @param {number} [config.pageSize] - 每页评论数（可选，默认 20）
+	 * @param {string|Object} [config.emotionJson] - 前端表情 JSON 文件链接，留空则不显示表情按钮
 	 *
 	 * 以下字段由组件自动推导或从后端读取，无需通过 config 传入：
 	 * - postSlug：window.location.origin + window.location.pathname
@@ -30,6 +32,7 @@ export class CWDComments {
 	 */
 	constructor(config) {
 		this.config = { ...config };
+		this.emotionGroups = [];
 		if (config.siteId) {
 			this.config.siteId = config.siteId;
 		}
@@ -126,6 +129,7 @@ export class CWDComments {
 				commentPlaceholder:
 					typeof data.commentPlaceholder === 'string' ? data.commentPlaceholder : undefined,
 				widgetLanguage: typeof data.widgetLanguage === 'string' ? data.widgetLanguage : undefined,
+				emotionJson: typeof data.emotionJson === 'string' ? data.emotionJson : undefined,
 			};
 		} catch (e) {
 			return {};
@@ -234,6 +238,15 @@ export class CWDComments {
 				typeof serverConfig.commentPlaceholder === 'string'
 					? serverConfig.commentPlaceholder
 					: this.config.commentPlaceholder;
+			const emotionSource =
+				typeof serverConfig.emotionJson === 'string' && serverConfig.emotionJson.trim()
+					? serverConfig.emotionJson
+					: this.config.emotionJson;
+			const emotionGroups = await loadEmotionGroups(emotionSource);
+			if (!this._mounted) {
+				return;
+			}
+			this.emotionGroups = emotionGroups;
 
 			const api = createApiClient(this.config);
 			this.api = api;
@@ -415,6 +428,7 @@ export class CWDComments {
 				adminEmail: this.config.adminEmail,
 				onVerifyAdmin: (key) => this.api.verifyAdminKey(key),
 				placeholder: this.config.commentPlaceholder,
+				emotionGroups: this.emotionGroups,
 				t: this.t
 			});
 			this.commentForm.render();
@@ -466,6 +480,7 @@ export class CWDComments {
 				onUpdateReplyContent: (content) => this.store.updateReplyContent(content),
 				onClearReplyError: () => this.store.clearReplyError(),
           replyPlaceholder: this.config.commentPlaceholder,
+				emotionGroups: this.emotionGroups,
 				onPrevPage: () => {
 					const currentState = this.store.store.getState();
 					this.store.goToPage(currentState.pagination.page - 1);
@@ -512,6 +527,7 @@ export class CWDComments {
 				formErrors: state.formErrors,
 				submitting: state.submitting,
 				adminEmail: this.config.adminEmail,
+				emotionGroups: this.emotionGroups,
 			});
 		}
 
@@ -591,6 +607,7 @@ export class CWDComments {
 				replyError: state.replyError,
 				submitting: state.submitting,
 				currentUser: state.form,
+				emotionGroups: this.emotionGroups,
 			});
 		}
 

@@ -222,6 +222,22 @@
                   </div>
                 </div>
 
+                <div class="form-item">
+                  <label class="form-label">{{
+                    t("settings.feature.emotionJson")
+                  }}</label>
+                  <textarea
+                    v-model="emotionJson"
+                    class="form-input"
+                    rows="10"
+                    style="height: 220px; resize: vertical; font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace"
+                    :placeholder="t('settings.feature.emotionJsonHint')"
+                  ></textarea>
+                  <div class="form-hint">
+                    {{ t("settings.feature.emotionJsonHint") }}
+                  </div>
+                </div>
+
                 <div class="card-actions">
                   <button
                     class="card-button"
@@ -642,6 +658,7 @@ const enableArticleLike = ref(true);
 const enableCommentLike = ref(true);
 const enableImageLightbox = ref(true);
 const commentPlaceholder = ref("");
+const emotionJson = ref("");
 const telegramBotToken = ref("");
 const telegramChatId = ref("");
 const telegramNotifyEnabled = ref(false);
@@ -829,6 +846,7 @@ async function load() {
     enableCommentLike.value = featureRes.enableCommentLike;
     enableImageLightbox.value = featureRes.enableImageLightbox;
     commentPlaceholder.value = featureRes.commentPlaceholder || "";
+    emotionJson.value = featureRes.emotionJson || "";
     adminLanguage.value = featureRes.adminLanguage || "zh-CN";
     widgetLanguage.value = featureRes.widgetLanguage || "auto";
 
@@ -986,6 +1004,7 @@ async function saveFeature() {
         enableImageLightbox: enableImageLightbox.value,
         commentPlaceholder: commentPlaceholder.value,
         widgetLanguage: widgetLanguage.value,
+        emotionJson: emotionJson.value,
       }),
     ]);
 

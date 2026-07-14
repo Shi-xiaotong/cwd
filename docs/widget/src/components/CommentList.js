@@ -32,6 +32,7 @@ export class CommentList extends Component {
    * @param {string} props.adminEmail - 博主邮箱（可选）
    * @param {string} props.adminBadge - 博主标识文字（可选）
    * @param {boolean} props.enableCommentLike - 是否开启评论点赞
+   * @param {Array} props.emotionGroups - 表情分组
    */
   constructor(container, props = {}) {
     super(container, props);
@@ -102,6 +103,7 @@ export class CommentList extends Component {
           adminBadge: this.props.adminBadge,
           enableCommentLike: this.props.enableCommentLike,
           replyPlaceholder: this.props.replyPlaceholder,
+          emotionGroups: this.props.emotionGroups,
           onReply: (commentId) => this.handleReply(commentId),
           onSubmitReply: (commentId) => this.handleSubmitReply(commentId),
           onCancelReply: () => this.handleCancelReply(),
@@ -175,6 +177,7 @@ export class CommentList extends Component {
           submitting: this.props.submitting,
           currentUser: this.props.currentUser,
           enableCommentLike: this.props.enableCommentLike,
+          emotionGroups: this.props.emotionGroups,
           onLikeComment: (commentId, isLike) => this.handleLikeComment(commentId, isLike)
         });
       });

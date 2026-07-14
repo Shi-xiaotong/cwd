@@ -4,7 +4,9 @@
 
 import { Component } from './Component.js';
 import { AdminAuthModal } from './AdminAuthModal.js';
+import { EmotionPicker } from './EmotionPicker.js';
 import { auth } from '../utils/auth.js';
+import { insertTextAtCursor } from '../utils/emotions.js';
 import { renderMarkdown } from '../utils/markdown.js';
 
 export class CommentForm extends Component {
@@ -17,6 +19,7 @@ export class CommentForm extends Component {
 	 * @param {Function} props.onSubmit - 提交回调
 	 * @param {Function} props.onFieldChange - 字段变化回调
 	 * @param {string} props.adminEmail - 管理员邮箱
+	 * @param {Array} props.emotionGroups - 表情分组
 	 * @param {Function} props.onVerifyAdmin - 验证管理员回调 (returns Promise)
 	 */
 	constructor(container, props = {}) {
@@ -35,6 +38,7 @@ export class CommentForm extends Component {
 			showPreview: false,
 		};
 		this.modal = null;
+		this.emotionPicker = null;
 	}
 
 	render() {
@@ -112,6 +116,9 @@ export class CommentForm extends Component {
 										onKeydown: (e) => this.handleContentKeydown(e),
 									},
 								}),
+								this.createElement('div', {
+									className: 'cwd-emotion-picker-container',
+								}),
 								...(formErrors.content ? [this.createTextElement('span', formErrors.content, 'cwd-error-text')] : []),
 							],
 						}),
@@ -167,6 +174,28 @@ export class CommentForm extends Component {
 		this.elements.root = root;
 		this.empty(this.container);
 		this.container.appendChild(root);
+		this.renderEmotionPicker(root);
+	}
+
+	/**
+	 * 渲染评论框表情选择器。
+	 *
+	 * @param {HTMLElement} root - 表单根元素
+	 */
+	renderEmotionPicker(root) {
+		const groups = Array.isArray(this.props.emotionGroups) ? this.props.emotionGroups : [];
+		const pickerContainer = root.querySelector('.cwd-emotion-picker-container');
+		if (!pickerContainer || !groups.length) {
+			this.emotionPicker = null;
+			return;
+		}
+
+		this.emotionPicker = new EmotionPicker(pickerContainer, {
+			groups,
+			onSelect: (item) => this.handleEmotionSelect(item),
+			t: this.t,
+		});
+		this.emotionPicker.render();
 	}
 
 	updateProps(prevProps) {
@@ -348,6 +377,22 @@ export class CommentForm extends Component {
 				this.updatePreviewContent(value);
 			}
 		}
+	}
+
+	/**
+	 * 插入选中的表情。
+	 *
+	 * @param {Object} item - 表情项
+	 */
+	handleEmotionSelect(item) {
+		const textarea = this.elements.root?.querySelector('.cwd-form-textarea');
+		if (!textarea) {
+			return;
+		}
+
+		const nextValue = insertTextAtCursor(textarea, item.insertValue);
+		this.handleFieldChange('content', nextValue);
+		textarea.focus();
 	}
 
 	handleContentKeydown(e) {

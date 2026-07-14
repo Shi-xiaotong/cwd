@@ -142,7 +142,12 @@ export const postComment = async (c: Context<{ Bindings: Bindings }>) => {
       span: ['class', 'style'],
       pre: ['class'],
       div: ['class', 'style'],
-      img: ['src', 'alt', 'title', 'width', 'height', 'style']
+      img: ['src', 'alt', 'title', 'width', 'height', 'style', 'class']
+    },
+    onTagAttr(tag, name, value) {
+      if (tag === 'img' && name === 'class') {
+        return value.split(/\s+/).includes('tk-owo-emotion') ? 'class="tk-owo-emotion"' : '';
+      }
     }
   });
 

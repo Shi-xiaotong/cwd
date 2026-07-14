@@ -7,7 +7,7 @@
     "dev": "vitepress dev",
     "build:docs": "vitepress build",
     "build:widget": "cd widget && npm install && npm run build",
-    "build": "npm run build:widget && node build.js && npm run build:docs",
+    "build": "npm run build:widget && npm run build:docs && node build.js dist",
     "preview": "vitepress preview"
   },
   "devDependencies": {

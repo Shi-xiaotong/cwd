@@ -222,6 +222,7 @@ export class CommentItem extends Component {
 					onCancel: () => this.handleCancelReply(),
 					onClearError: () => this.handleClearReplyError(),
 					placeholder: this.props.replyPlaceholder,
+					emotionGroups: this.props.emotionGroups,
 					t: this.t
 				});
 				this.replyEditor.render();
@@ -250,6 +251,7 @@ export class CommentItem extends Component {
 						adminBadge: this.props.adminBadge,
 						enableCommentLike: this.props.enableCommentLike,
 						replyPlaceholder: this.props.replyPlaceholder,
+						emotionGroups: this.props.emotionGroups,
 						onReply: this.props.onReply,
 						onLikeComment: this.props.onLikeComment,
 						onSubmitReply: this.props.onSubmitReply,
@@ -304,6 +306,7 @@ export class CommentItem extends Component {
 					onCancel: () => this.handleCancelReply(),
 					onClearError: () => this.handleClearReplyError(),
 					placeholder: this.props.replyPlaceholder,
+					emotionGroups: this.props.emotionGroups,
 					t: this.t
 				});
 				this.replyEditor.render();
@@ -321,6 +324,7 @@ export class CommentItem extends Component {
 				submitting: this.props.submitting,
 				currentUser: this.props.currentUser,
 				placeholder: this.props.replyPlaceholder,
+				emotionGroups: this.props.emotionGroups,
 			});
 		}
 
@@ -335,6 +339,7 @@ export class CommentItem extends Component {
 					currentUser: this.props.currentUser,
 					enableCommentLike: this.props.enableCommentLike,
 					replyPlaceholder: this.props.replyPlaceholder,
+					emotionGroups: this.props.emotionGroups,
 					onLikeComment: this.props.onLikeComment,
 				});
 			});

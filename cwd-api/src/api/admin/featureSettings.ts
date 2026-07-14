@@ -1,6 +1,7 @@
 import { Context } from 'hono';
 import { Bindings } from '../../bindings';
 import {
+	assertValidEmotionJsonUrl,
 	loadFeatureSettings,
 	saveFeatureSettings
 } from '../../utils/featureSettings';
@@ -40,6 +41,8 @@ export const updateFeatureSettings = async (c: Context<{ Bindings: Bindings }>) 
 		
 		const adminLanguage = typeof body.adminLanguage === 'string' ? body.adminLanguage : undefined;
 		const widgetLanguage = typeof body.widgetLanguage === 'string' ? body.widgetLanguage : undefined;
+		const emotionJson =
+			typeof body.emotionJson === 'string' ? assertValidEmotionJsonUrl(body.emotionJson) : undefined;
 
 		await saveFeatureSettings(c.env, {
 			enableCommentLike,
@@ -48,7 +51,8 @@ export const updateFeatureSettings = async (c: Context<{ Bindings: Bindings }>) 
 			commentPlaceholder,
 			visibleDomains,
 			adminLanguage,
-			widgetLanguage
+			widgetLanguage,
+			emotionJson
 		});
 
 		return c.json({ message: '保存成功！' });
